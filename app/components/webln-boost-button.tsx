@@ -101,7 +101,7 @@ export default function WebLNBoostButton({
       case "initial":
         return (
           <>
-            <div className="relative w-32 h-32 bg-[#008B8B] rounded-full flex items-center justify-center overflow-hidden">
+            <div className="relative w-32 h-32 bg-[#3B81A2] rounded-full flex items-center justify-center overflow-hidden">
               <img
                 src="/assets/images/bitflow-avatar.png"
                 alt="Bitflow"
@@ -111,7 +111,7 @@ export default function WebLNBoostButton({
             <h1 className="text-4xl font-bold text-white">Bitflow</h1>
             <Button
               onClick={() => setStep("amount")}
-              className="bg-white hover:bg-white/90 text-[#008B8B] font-bold text-xl px-8 py-4 rounded-full shadow-[0_8px_16px_rgba(0,0,0,0.15)] hover:shadow-[0_12px_24px_rgba(0,0,0,0.2)] transition-all duration-200"
+              className="bg-white hover:bg-white/90 text-[#3B81A2] font-bold text-xl px-8 py-4 rounded-full shadow-[0_8px_16px_rgba(0,0,0,0.15)] hover:shadow-[0_12px_24px_rgba(0,0,0,0.2)] transition-all duration-200"
             >
               Donate Sats
             </Button>
@@ -129,7 +129,7 @@ export default function WebLNBoostButton({
                   onClick={() => handleAmountSelect(preset)}
                   className={`rounded-full px-6 py-2 flex-1 ${
                     amount === preset
-                      ? "bg-white text-[#008B8B]"
+                      ? "bg-white text-[#3B81A2]"
                       : "bg-transparent text-white border-2 border-white"
                   }`}
                 >
@@ -143,7 +143,7 @@ export default function WebLNBoostButton({
               onMouseLeave={() => setIsHolding(false)}
               onTouchStart={() => setIsHolding(true)}
               onTouchEnd={() => setIsHolding(false)}
-              className="w-24 h-24 mb-6 rounded-full bg-white hover:bg-white/90 text-[#008B8B] flex items-center justify-center shadow-lg transform active:scale-95 transition-transform"
+              className="w-24 h-24 mb-6 rounded-full bg-white hover:bg-white/90 text-[#3B81A2] font-bold flex items-center justify-center shadow-lg transform active:scale-95 transition-transform"
             >
               <div className="flex flex-col items-center text-sm">
                 <span>Press</span>
@@ -164,7 +164,7 @@ export default function WebLNBoostButton({
             </div>
             <Button
               onClick={() => setStep("note")}
-              className="bg-white hover:bg-white/90 text-[#008B8B] font-bold text-xl px-8 py-4 rounded-full shadow-[0_8px_16px_rgba(0,0,0,0.15)] hover:shadow-[0_12px_24px_rgba(0,0,0,0.2)] transition-all duration-200"
+              className="bg-white hover:bg-white/90 text-[#3B81A2] font-bold text-xl px-8 py-4 rounded-full shadow-[0_8px_16px_rgba(0,0,0,0.15)] hover:shadow-[0_12px_24px_rgba(0,0,0,0.2)] transition-all duration-200"
             >
               Next
             </Button>
@@ -183,7 +183,7 @@ export default function WebLNBoostButton({
             />
             <Button
               onClick={handleBoost}
-              className="bg-white hover:bg-white/90 text-[#008B8B] font-bold text-xl px-8 py-4 rounded-full shadow-[0_8px_16px_rgba(0,0,0,0.15)] hover:shadow-[0_12px_24px_rgba(0,0,0,0.2)] transition-all duration-200"
+              className="bg-white hover:bg-white/90 text-[#3B81A2] font-bold text-xl px-8 py-4 rounded-full shadow-[0_8px_16px_rgba(0,0,0,0.15)] hover:shadow-[0_12px_24px_rgba(0,0,0,0.2)] transition-all duration-200"
             >
               Next
             </Button>
@@ -198,7 +198,7 @@ export default function WebLNBoostButton({
             </div>
             <Button
               onClick={resetToInitialState}
-              className="bg-white hover:bg-white/90 text-[#008B8B] font-bold text-xl px-8 py-4 rounded-full shadow-[0_8px_16px_rgba(0,0,0,0.15)] hover:shadow-[0_12px_24px_rgba(0,0,0,0.2)] transition-all duration-200"
+              className="bg-white hover:bg-white/90 text-[#3B81A2] font-bold text-xl px-8 py-4 rounded-full shadow-[0_8px_16px_rgba(0,0,0,0.15)] hover:shadow-[0_12px_24px_rgba(0,0,0,0.2)] transition-all duration-200"
             >
               Done?
             </Button>
