@@ -152,10 +152,10 @@ export default function WebLNBoostButton({
               onTouchEnd={() => setIsHolding(false)}
               className="w-22 h-22 mb-4 rounded-full bg-white hover:bg-white/90 text-[#3B81A2] font-bold flex items-center justify-center shadow-lg transform active:scale-95 transition-transform"
             >
-              <div className="flex flex-col items-center justify-center h-full text-xs">
+              <div className="flex flex-col items-center justify-center h-full text-xs font-bold">
                 <span>Press</span>
                 <span>to Boost</span>
-                <span className="text-lg mt-1">⚡</span>
+                <span className="text-lg mt-1 font-bold">⚡</span>
               </div>
             </Button>
             <div className="w-full max-w-[280px] flex justify-center">
@@ -169,31 +169,47 @@ export default function WebLNBoostButton({
                 className="w-full px-4 py-2 mb-4 rounded-full text-center text-lg placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#3B81A2]"
               />
             </div>
-            <Button
-              onClick={() => setStep("note")}
-              className="bg-white hover:bg-white/90 text-[#3B81A2] font-bold text-lg px-6 py-3 rounded-full shadow-[0_8px_16px_rgba(0,0,0,0.15)] hover:shadow-[0_12px_24px_rgba(0,0,0,0.2)] transition-all duration-200"
-            >
-              Next
-            </Button>
+            <div className="flex gap-4">
+              <Button
+                onClick={() => setStep("initial")}
+                className="bg-transparent hover:bg-white/10 text-white border-2 border-white font-bold text-lg px-6 py-3 rounded-full transition-all duration-200"
+              >
+                Back
+              </Button>
+              <Button
+                onClick={() => setStep("note")}
+                className="bg-white hover:bg-white/90 text-[#3B81A2] font-bold text-lg px-6 py-3 rounded-full shadow-[0_8px_16px_rgba(0,0,0,0.15)] hover:shadow-[0_12px_24px_rgba(0,0,0,0.2)] transition-all duration-200"
+              >
+                Next
+              </Button>
+            </div>
           </>
         )
 
       case "note":
         return (
           <>
-            <h1 className="text-4xl font-bold text-white mb-8">Want to add a note?</h1>
+            <h1 className="text-3xl font-bold text-white mb-8">Want to add a note?</h1>
             <textarea
               value={note}
               onChange={handleNoteChange}
               placeholder="Enter your note"
               className="w-full max-w-[320px] p-4 rounded-3xl text-xl mb-6 h-40 resize-none"
             />
-            <Button
-              onClick={handleBoost}
-              className="bg-white hover:bg-white/90 text-[#3B81A2] font-bold text-xl px-8 py-4 rounded-full shadow-[0_8px_16px_rgba(0,0,0,0.15)] hover:shadow-[0_12px_24px_rgba(0,0,0,0.2)] transition-all duration-200"
-            >
-              Next
-            </Button>
+            <div className="flex gap-4">
+              <Button
+                onClick={() => setStep("amount")}
+                className="bg-transparent hover:bg-white/10 text-white border-2 border-white font-bold text-lg px-6 py-3 rounded-full transition-all duration-200"
+              >
+                Back
+              </Button>
+              <Button
+                onClick={handleBoost}
+                className="bg-white hover:bg-white/90 text-[#3B81A2] font-bold text-xl px-8 py-4 rounded-full shadow-[0_8px_16px_rgba(0,0,0,0.15)] hover:shadow-[0_12px_24px_rgba(0,0,0,0.2)] transition-all duration-200"
+              >
+                Next
+              </Button>
+            </div>
           </>
         )
 
