@@ -40,29 +40,45 @@ export default function WebLNBoostButton({
   const [invoice, setInvoice] = useState<string>("")
   const [isHolding, setIsHolding] = useState(false)
   const holdTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    // Detectar si es dispositivo móvil
+    const checkMobile = () => {
+      const mobile = /iPhone|iPad|Android/i.test(navigator.userAgent)
+      setIsMobile(mobile)
+      if (mobile) {
+        setWeblnError("") // No mostrar error de WebLN en móvil
+      }
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   useEffect(() => {
     const initWebLN = async () => {
       try {
-        const provider = await requestProvider()
-        setWebln(provider)
-        setWeblnError("")
+        // Solo intentar WebLN en desktop
+        if (!isMobile) {
+          const provider = await requestProvider()
+          setWebln(provider)
+          setWeblnError("")
+        }
       } catch (err) {
         console.error("WebLN no está disponible:", err)
-        setWeblnError("No se detectó una billetera compatible con WebLN")
+        if (!isMobile) {
+          setWeblnError("No se detectó una billetera compatible con WebLN")
+        }
       }
     }
     initWebLN()
-  }, [])
+  }, [isMobile])
 
   useEffect(() => {
     if (isHolding) {
-      setAmount(0)
-      holdTimerRef.current = setInterval(() => {
-        setAmount(prev => prev + incrementValue)
-      }, incrementSpeed)
-    } else if (holdTimerRef.current) {
-      clearInterval(holdTimerRef.current)
+      setAmount(prev => prev + incrementValue)
     }
 
     return () => {
@@ -93,73 +109,74 @@ export default function WebLNBoostButton({
     setStep("initial")
   }
 
-  const handleBoost = async () => {
-    if (!webln) {
-      setStep("initial")
-      return
+  const generateInvoice = async () => {
+    const msatsAmount = Math.round(amount * 1000)
+    let response: Response
+    
+    switch (receiverType) {
+      case 'lightning':
+        response = await fetch(
+          `https://api.getalby.com/lnurl/generate-invoice?ln=${receiver}&amount=${msatsAmount}&comment=${encodeURIComponent(note || "Boost con Bitflow")}`
+        )
+        break
+      case 'lnurl':
+        response = await fetch(
+          `${receiver}?amount=${msatsAmount}&comment=${encodeURIComponent(note || "Boost con Bitflow")}`
+        )
+        break
+      case 'node':
+        response = await fetch(
+          `https://api.getalby.com/payments/keysend?node_id=${receiver}&amount=${msatsAmount}&comment=${encodeURIComponent(note || "Boost con Bitflow")}`
+        )
+        break
+      default:
+        throw new Error("Tipo de receptor no válido")
+    }
+    
+    if (!response.ok) {
+      throw new Error(`Error al generar factura: ${response.status}`)
     }
 
+    const data = await response.json()
+    console.log("Respuesta:", data)
+    
+    if (!data.invoice?.pr || typeof data.invoice.pr !== 'string') {
+      throw new Error("La factura no se generó correctamente")
+    }
+
+    return data.invoice.pr as string
+  }
+
+  const handleBoost = async () => {
     try {
+      // En móvil o sin WebLN, ir directo al QR
+      if (isMobile || !webln) {
+        const invoicePr = await generateInvoice()
+        setInvoice(invoicePr)
+        setStep("qr")
+        return
+      }
+
+      // En desktop con WebLN
       await webln.enable()
-      let invoicePr: string | null = null
+      const invoicePr = await generateInvoice()
       
       try {
-        const msatsAmount = Math.round(amount * 1000)
-        let response: Response
-        
-        switch (receiverType) {
-          case 'lightning':
-            response = await fetch(
-              `https://api.getalby.com/lnurl/generate-invoice?ln=${receiver}&amount=${msatsAmount}&comment=${encodeURIComponent(note || "Boost con Bitflow")}`
-            )
-            break
-          case 'lnurl':
-            // LNURL ya es una URL completa
-            response = await fetch(
-              `${receiver}?amount=${msatsAmount}&comment=${encodeURIComponent(note || "Boost con Bitflow")}`
-            )
-            break
-          case 'node':
-            // Para pagos keysend, necesitamos generar una factura especial
-            response = await fetch(
-              `https://api.getalby.com/payments/keysend?node_id=${receiver}&amount=${msatsAmount}&comment=${encodeURIComponent(note || "Boost con Bitflow")}`
-            )
-            break
-          default:
-            throw new Error("Tipo de receptor no válido")
-        }
-        
-        if (!response.ok) {
-          throw new Error(`Error al generar factura: ${response.status}`)
-        }
-
-        const data = await response.json()
-        console.log("Respuesta:", data)
-        
-        if (!data.invoice?.pr || typeof data.invoice.pr !== 'string') {
-          throw new Error("La factura no se generó correctamente")
-        }
-
-        invoicePr = data.invoice.pr as string
-        
         await webln.sendPayment(invoicePr)
         resetToInitialState()
-      } catch (error: unknown) {
+      } catch (error) {
         console.error("Error al enviar pago directo:", error)
         if (error instanceof Error && error.message?.includes('User rejected')) {
           setWeblnError("Pago cancelado por el usuario.")
           setStep("initial")
-        } else if (invoicePr) {
+        } else {
           setInvoice(invoicePr)
           setStep("qr")
-        } else {
-          setWeblnError("Error al generar la factura. Por favor, intenta de nuevo.")
-          setStep("initial")
         }
       }
     } catch (error: unknown) {
-      console.error("Error al inicializar WebLN:", error)
-      setWeblnError("Error al inicializar la billetera. Por favor, intenta de nuevo.")
+      console.error("Error:", error)
+      setWeblnError("Error al generar la factura. Por favor, intenta de nuevo.")
       setStep("initial")
     }
   }
