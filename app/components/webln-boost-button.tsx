@@ -10,7 +10,12 @@ import Image from "next/image"
 const RECIPIENT_ADDRESS = "bitflowz@getalby.com"
 
 interface WebLNBoostButtonProps {
+  receiverType?: 'lightning' | 'lnurl' | 'node'
+  receiver?: string
   defaultAmount?: number
+  amounts?: number[]
+  labels?: string[]
+  theme?: string
   incrementSpeed?: number
   incrementValue?: number
 }
@@ -18,7 +23,12 @@ interface WebLNBoostButtonProps {
 type Step = "initial" | "amount" | "note" | "qr"
 
 export default function WebLNBoostButton({
+  receiverType = 'lightning',
+  receiver = RECIPIENT_ADDRESS,
   defaultAmount = 100,
+  amounts = [21, 100, 1000],
+  labels = ['Café', 'Propina', 'Boost'],
+  theme = 'orange',
   incrementSpeed = 50,
   incrementValue = 10,
 }: WebLNBoostButtonProps) {
@@ -95,17 +105,36 @@ export default function WebLNBoostButton({
       
       try {
         const msatsAmount = Math.round(amount * 1000)
+        let response: Response
         
-        const response = await fetch(
-          `https://api.getalby.com/lnurl/generate-invoice?ln=${RECIPIENT_ADDRESS}&amount=${msatsAmount}&comment=${encodeURIComponent(note || "Boost con Bitflow")}`
-        )
+        switch (receiverType) {
+          case 'lightning':
+            response = await fetch(
+              `https://api.getalby.com/lnurl/generate-invoice?ln=${receiver}&amount=${msatsAmount}&comment=${encodeURIComponent(note || "Boost con Bitflow")}`
+            )
+            break
+          case 'lnurl':
+            // LNURL ya es una URL completa
+            response = await fetch(
+              `${receiver}?amount=${msatsAmount}&comment=${encodeURIComponent(note || "Boost con Bitflow")}`
+            )
+            break
+          case 'node':
+            // Para pagos keysend, necesitamos generar una factura especial
+            response = await fetch(
+              `https://api.getalby.com/payments/keysend?node_id=${receiver}&amount=${msatsAmount}&comment=${encodeURIComponent(note || "Boost con Bitflow")}`
+            )
+            break
+          default:
+            throw new Error("Tipo de receptor no válido")
+        }
         
         if (!response.ok) {
           throw new Error(`Error al generar factura: ${response.status}`)
         }
 
         const data = await response.json()
-        console.log("Respuesta de Alby:", data)
+        console.log("Respuesta:", data)
         
         if (!data.invoice?.pr || typeof data.invoice.pr !== 'string') {
           throw new Error("La factura no se generó correctamente")
@@ -167,7 +196,7 @@ export default function WebLNBoostButton({
           <>
             <h1 className="text-3xl font-bold text-white mb-6">How many Sats?</h1>
             <div className="flex gap-3 mb-4 w-full max-w-[280px] justify-center">
-              {[21, 100, 1000].map((preset) => (
+              {amounts.map((preset, index) => (
                 <Button
                   key={preset}
                   onClick={() => handleAmountSelect(preset)}
@@ -177,7 +206,7 @@ export default function WebLNBoostButton({
                       : "bg-transparent text-white border-2 border-white"
                   }`}
                 >
-                  {preset === 1000 ? "1k" : preset}
+                  {labels[index] || preset}
                 </Button>
               ))}
             </div>
@@ -267,10 +296,16 @@ export default function WebLNBoostButton({
     }
   }
 
+  const themeColors = {
+    orange: '#FF8C00',
+    blue: '#3B81A2',
+    green: '#2E7D32'
+  }
+
   return (
     <div className="flex flex-col items-center gap-8">
       <div className="w-[410px] h-[410px]">
-        <div className={`flex flex-col items-center justify-center w-full h-full bg-[#FF8C00] rounded-3xl p-6 space-y-4 shadow-[0_20px_40px_rgba(0,0,0,0.2)] transition-all duration-300
+        <div className={`flex flex-col items-center justify-center w-full h-full bg-[${themeColors[theme as keyof typeof themeColors]}] rounded-3xl p-6 space-y-4 shadow-[0_20px_40px_rgba(0,0,0,0.2)] transition-all duration-300
           ${!webln && 'opacity-95'}`}
         >
           {renderStep()}
