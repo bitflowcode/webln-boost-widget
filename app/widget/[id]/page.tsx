@@ -11,14 +11,14 @@ interface WidgetConfig {
   theme: string
 }
 
-interface PageProps {
+type Props = {
   params: {
     id: string
   }
-  searchParams?: { [key: string]: string | string[] | undefined }
+  searchParams: Record<string, string | string[] | undefined>
 }
 
-export default function Widget({ params }: PageProps) {
+export default function Widget({ params, searchParams }: Props) {
   const [config, setConfig] = useState<WidgetConfig | null>(null)
   const [error, setError] = useState<string>('')
 
