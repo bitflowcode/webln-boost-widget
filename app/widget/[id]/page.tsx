@@ -7,8 +7,8 @@ interface PageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
-async function Page({ params, searchParams }: PageProps) {
-  const [resolvedParams, resolvedSearchParams] = await Promise.all([params, searchParams])
+async function Page({ params }: PageProps) {
+  const resolvedParams = await params
   return <WidgetClient id={resolvedParams.id} />
 }
 
