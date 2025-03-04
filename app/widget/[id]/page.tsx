@@ -17,7 +17,7 @@ interface PageProps {
   }
 }
 
-export default async function Widget({ params }: PageProps) {
+export default function Widget({ params }: PageProps) {
   const [config, setConfig] = useState<WidgetConfig | null>(null)
   const [error, setError] = useState<string>('')
 

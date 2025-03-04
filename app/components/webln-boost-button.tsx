@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import { requestProvider, type WebLNProvider } from "webln"
 import { Button } from "@/app/components/ui/button"
 import { QRCodeSVG } from "qrcode.react"
