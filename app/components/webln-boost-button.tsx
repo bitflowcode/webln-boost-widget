@@ -97,12 +97,9 @@ export default function WebLNBoostButton({
       await webln.enable()
       let invoicePr: string | null = null
       
-      // Si el usuario tiene WebLN (Alby), intentamos pago directo
       try {
-        // Convertimos la cantidad a milisatoshis (debe ser un entero)
         const msatsAmount = Math.round(amount * 1000)
         
-        // Obtenemos la factura usando LNURL
         const response = await fetch(
           `https://getalby.com/lnurlp/${RECIPIENT_ADDRESS}/callback?amount=${msatsAmount}&comment=${encodeURIComponent(note || "Boost con Bitflow")}`
         )
@@ -114,18 +111,14 @@ export default function WebLNBoostButton({
         const data = await response.json() as { pr: string }
         invoicePr = data.pr
         
-        // Intentamos pagar con WebLN
         await webln.sendPayment(invoicePr)
-        // Si el pago es exitoso, mostramos mensaje de éxito
         resetToInitialState()
       } catch (error: unknown) {
         console.error("Error al enviar pago directo:", error)
-        // Si falla el pago directo, mostramos el QR como fallback
         if (error instanceof Error && error.message?.includes('User rejected')) {
           setWeblnError("Pago cancelado por el usuario.")
           setStep("initial")
         } else if (invoicePr) {
-          // Usamos la última factura generada para mostrar el QR
           setInvoice(invoicePr)
           setStep("qr")
         } else {
@@ -133,7 +126,7 @@ export default function WebLNBoostButton({
           setStep("initial")
         }
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error al inicializar WebLN:", error)
       setWeblnError("Error al inicializar la billetera. Por favor, intenta de nuevo.")
       setStep("initial")
