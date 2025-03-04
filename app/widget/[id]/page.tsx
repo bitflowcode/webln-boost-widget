@@ -1,15 +1,15 @@
 import WidgetClient from './widget-client'
-import { FC } from 'react'
 
 interface PageProps {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
   searchParams: { [key: string]: string | string[] | undefined }
 }
 
-const Page: FC<PageProps> = ({ params }) => {
-  return <WidgetClient id={params.id} />
+async function Page({ params }: PageProps) {
+  const resolvedParams = await params
+  return <WidgetClient id={resolvedParams.id} />
 }
 
 export default Page 
