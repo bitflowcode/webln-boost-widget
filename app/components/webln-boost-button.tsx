@@ -6,6 +6,8 @@ import { Button } from "@/app/components/ui/button"
 import { QRCodeSVG } from "qrcode.react"
 import { WebLNGuide } from "./webln-guide"
 
+const RECIPIENT_ADDRESS = "bitflowz@getalby.com"
+
 interface WebLNBoostButtonProps {
   defaultAmount?: number
   incrementSpeed?: number
@@ -88,15 +90,47 @@ export default function WebLNBoostButton({
 
     try {
       await webln.enable()
-      const response = await webln.makeInvoice({
-        amount,
-        defaultMemo: note || "Boost con Bitflow"
-      })
-      setInvoice(response.paymentRequest)
-      setStep("qr")
+      let invoicePr: string | null = null
+      
+      // Si el usuario tiene WebLN (Alby), intentamos pago directo
+      try {
+        // Convertimos la cantidad a milisatoshis (debe ser un entero)
+        const msatsAmount = Math.round(amount * 1000)
+        
+        // Obtenemos la factura usando LNURL
+        const response = await fetch(
+          `https://getalby.com/lnurlp/${RECIPIENT_ADDRESS}/callback?amount=${msatsAmount}&comment=${encodeURIComponent(note || "Boost con Bitflow")}`
+        )
+        
+        if (!response.ok) {
+          throw new Error(`Error al generar factura: ${response.status}`)
+        }
+
+        const data = await response.json() as { pr: string }
+        invoicePr = data.pr
+        
+        // Intentamos pagar con WebLN
+        await webln.sendPayment(invoicePr)
+        // Si el pago es exitoso, mostramos mensaje de éxito
+        resetToInitialState()
+      } catch (error: any) {
+        console.error("Error al enviar pago directo:", error)
+        // Si falla el pago directo, mostramos el QR como fallback
+        if (error.message?.includes('User rejected')) {
+          setWeblnError("Pago cancelado por el usuario.")
+          setStep("initial")
+        } else if (invoicePr) {
+          // Usamos la última factura generada para mostrar el QR
+          setInvoice(invoicePr)
+          setStep("qr")
+        } else {
+          setWeblnError("Error al generar la factura. Por favor, intenta de nuevo.")
+          setStep("initial")
+        }
+      }
     } catch (error) {
-      console.error("Error al generar la factura:", error)
-      setWeblnError("Error al generar la factura. Por favor, intenta de nuevo.")
+      console.error("Error al inicializar WebLN:", error)
+      setWeblnError("Error al inicializar la billetera. Por favor, intenta de nuevo.")
       setStep("initial")
     }
   }
