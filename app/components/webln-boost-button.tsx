@@ -17,10 +17,6 @@ interface WebLNBoostButtonProps {
 
 type Step = "initial" | "amount" | "note" | "qr"
 
-interface WebLNError extends Error {
-  message: string;
-}
-
 export default function WebLNBoostButton({
   defaultAmount = 100,
   incrementSpeed = 50,
