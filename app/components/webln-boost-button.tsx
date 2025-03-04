@@ -39,7 +39,6 @@ export default function WebLNBoostButton({
   const [weblnError, setWeblnError] = useState<string>("")
   const [invoice, setInvoice] = useState<string>("")
   const [isHolding, setIsHolding] = useState(false)
-  const holdTimerRef = useRef<NodeJS.Timeout | null>(null)
   const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
@@ -77,13 +76,17 @@ export default function WebLNBoostButton({
   }, [isMobile])
 
   useEffect(() => {
+    let intervalId: NodeJS.Timeout | null = null;
+    
     if (isHolding) {
-      setAmount(prev => prev + incrementValue)
+      intervalId = setInterval(() => {
+        setAmount(prev => prev + incrementValue)
+      }, incrementSpeed)
     }
 
     return () => {
-      if (holdTimerRef.current) {
-        clearInterval(holdTimerRef.current)
+      if (intervalId) {
+        clearInterval(intervalId)
       }
     }
   }, [isHolding, incrementValue, incrementSpeed])
