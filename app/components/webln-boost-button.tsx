@@ -5,6 +5,7 @@ import { requestProvider, type WebLNProvider } from "webln"
 import { Button } from "@/app/components/ui/button"
 import { QRCodeSVG } from "qrcode.react"
 import { WebLNGuide } from "./webln-guide"
+import Image from "next/image"
 
 const RECIPIENT_ADDRESS = "bitflowz@getalby.com"
 
@@ -15,6 +16,10 @@ interface WebLNBoostButtonProps {
 }
 
 type Step = "initial" | "amount" | "note" | "qr"
+
+interface WebLNError extends Error {
+  message: string;
+}
 
 export default function WebLNBoostButton({
   defaultAmount = 100,
@@ -113,10 +118,10 @@ export default function WebLNBoostButton({
         await webln.sendPayment(invoicePr)
         // Si el pago es exitoso, mostramos mensaje de éxito
         resetToInitialState()
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error("Error al enviar pago directo:", error)
         // Si falla el pago directo, mostramos el QR como fallback
-        if (error.message?.includes('User rejected')) {
+        if (error instanceof Error && error.message?.includes('User rejected')) {
           setWeblnError("Pago cancelado por el usuario.")
           setStep("initial")
         } else if (invoicePr) {
@@ -141,10 +146,13 @@ export default function WebLNBoostButton({
         return (
           <>
             <div className="relative w-32 h-32 bg-[#3B81A2] rounded-full flex items-center justify-center overflow-hidden">
-              <img
+              <Image
                 src="/assets/images/bitflow-avatar.png"
                 alt="Bitflow"
-                className="w-full h-full object-contain"
+                width={128}
+                height={128}
+                className="object-contain"
+                priority
               />
             </div>
             <h1 className="text-3xl font-bold text-white">Bitflow</h1>
