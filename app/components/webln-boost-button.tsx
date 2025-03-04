@@ -107,11 +107,11 @@ export default function WebLNBoostButton({
         const data = await response.json()
         console.log("Respuesta de Alby:", data)
         
-        if (!data.pr || typeof data.pr !== 'string') {
+        if (!data.invoice?.pr || typeof data.invoice.pr !== 'string') {
           throw new Error("La factura no se generó correctamente")
         }
 
-        invoicePr = data.pr as string
+        invoicePr = data.invoice.pr as string
         
         await webln.sendPayment(invoicePr)
         resetToInitialState()
