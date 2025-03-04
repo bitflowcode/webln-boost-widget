@@ -3,8 +3,20 @@
 import { useState } from 'react'
 import WebLNBoostButton from '../components/webln-boost-button'
 
+const RECIPIENT_ADDRESS = "bitflowz@getalby.com"
+
+type ReceiverType = 'lightning' | 'lnurl' | 'node'
+
+interface WidgetConfig {
+  receiverType: ReceiverType
+  receiver: string
+  amounts: string
+  labels: string
+  theme: string
+}
+
 export default function CreateWidget() {
-  const [config, setConfig] = useState({
+  const [config, setConfig] = useState<WidgetConfig>({
     receiverType: 'lightning',
     receiver: '',
     amounts: '21,100,1000',
@@ -13,22 +25,58 @@ export default function CreateWidget() {
   })
 
   const generateWidgetCode = () => {
-    // Codificar config en base64
-    const encodedConfig = btoa(JSON.stringify(config))
-    return `<iframe 
-      src="https://www.bitflow.site/widget/${encodedConfig}"
-      width="410" 
-      height="410" 
-      frameborder="0"
-    ></iframe>`
+    try {
+      // Validar que los campos requeridos estén llenos
+      if (!config.receiver) {
+        throw new Error('Por favor, ingresa una dirección de receptor')
+      }
+
+      // Validar que los arrays tengan la misma longitud
+      const amountsArray = config.amounts.split(',')
+      const labelsArray = config.labels.split(',')
+      if (amountsArray.length !== labelsArray.length) {
+        throw new Error('La cantidad de montos y etiquetas debe ser igual')
+      }
+
+      // Validar que los montos sean números válidos
+      const amounts = amountsArray.map(a => {
+        const num = parseInt(a.trim())
+        if (isNaN(num)) throw new Error('Los montos deben ser números válidos')
+        return num
+      })
+
+      // Crear objeto de configuración limpio
+      const cleanConfig = {
+        ...config,
+        amounts: amounts.join(','),
+        labels: labelsArray.map(l => l.trim()).join(',')
+      }
+
+      // Codificar config en base64 URL-safe
+      const jsonString = JSON.stringify(cleanConfig)
+      const encodedConfig = btoa(jsonString).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+      
+      return `<iframe 
+        src="https://www.bitflow.site/widget/${encodedConfig}"
+        width="410" 
+        height="410" 
+        frameborder="0"
+      ></iframe>`
+    } catch (error) {
+      console.error('Error al generar el código:', error)
+      return 'Error: ' + (error instanceof Error ? error.message : 'Error desconocido')
+    }
   }
 
   const handleCopyCode = () => {
-    navigator.clipboard.writeText(generateWidgetCode())
+    const code = generateWidgetCode()
+    if (!code.startsWith('Error:')) {
+      navigator.clipboard.writeText(code)
+    }
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#1a1a1a] to-[#2a2a2a] text-white p-8">
+    <div className="min-h-screen bg-gradient-to-b from-[#1a1a1a] to-[#2a2a2a] text-white p-4 md:p-8">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-4xl font-bold mb-8 text-center">Crea tu Widget de Donación</h1>
         
@@ -42,7 +90,7 @@ export default function CreateWidget() {
               </label>
               <select 
                 value={config.receiverType}
-                onChange={(e) => setConfig({...config, receiverType: e.target.value})}
+                onChange={(e) => setConfig({...config, receiverType: e.target.value as ReceiverType})}
                 className="w-full p-3 bg-[#2d2d2d] rounded-lg border border-gray-600 text-white"
               >
                 <option value="lightning">Lightning Address</option>
@@ -115,20 +163,24 @@ export default function CreateWidget() {
           </div>
 
           {/* Vista Previa y Código */}
-          <div className="space-y-6">
+          <div className="space-y-6 sticky top-4">
             <div>
               <h2 className="text-xl font-bold mb-4">Vista Previa</h2>
               <div className="border border-gray-600 rounded-lg p-4">
                 <WebLNBoostButton
-                  defaultAmount={parseInt(config.amounts.split(',')[0])}
+                  receiverType={config.receiverType}
+                  receiver={config.receiver || RECIPIENT_ADDRESS}
+                  amounts={config.amounts.split(',').map(Number)}
+                  labels={config.labels.split(',')}
+                  theme={config.theme}
                 />
               </div>
             </div>
 
-            <div>
+            <div className="mt-8">
               <h2 className="text-xl font-bold mb-4">Código para tu Web</h2>
-              <pre className="bg-[#2d2d2d] p-4 rounded-lg overflow-x-auto">
-                <code className="text-sm">{generateWidgetCode()}</code>
+              <pre className="bg-[#2d2d2d] p-4 rounded-lg overflow-x-auto whitespace-pre-wrap">
+                <code className="text-sm break-all">{generateWidgetCode()}</code>
               </pre>
               <button
                 onClick={handleCopyCode}

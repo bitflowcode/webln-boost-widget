@@ -202,9 +202,7 @@ export default function WebLNBoostButton({
             <h1 className="text-3xl font-bold text-white">Bitflow</h1>
             <Button
               onClick={() => setStep("amount")}
-              disabled={!webln}
-              className={`bg-white hover:bg-white/90 text-[#3B81A2] font-bold text-lg px-6 py-3 rounded-full shadow-[0_8px_16px_rgba(0,0,0,0.15)] hover:shadow-[0_12px_24px_rgba(0,0,0,0.2)] transition-all duration-200
-                ${!webln && 'opacity-50 cursor-not-allowed hover:bg-white hover:shadow-[0_8px_16px_rgba(0,0,0,0.15)]'}`}
+              className="bg-white hover:bg-white/90 text-[#3B81A2] font-bold text-lg px-6 py-3 rounded-full shadow-[0_8px_16px_rgba(0,0,0,0.15)] hover:shadow-[0_12px_24px_rgba(0,0,0,0.2)] transition-all duration-200"
             >
               Donate Sats
             </Button>
