@@ -97,7 +97,7 @@ export default function WebLNBoostButton({
         const msatsAmount = Math.round(amount * 1000)
         
         const response = await fetch(
-          `https://getalby.com/.well-known/lnurlp/${RECIPIENT_ADDRESS.split('@')[0]}/callback?amount=${msatsAmount}&comment=${encodeURIComponent(note || "Boost con Bitflow")}`
+          `https://api.getalby.com/lnurl/generate-invoice?ln=${RECIPIENT_ADDRESS}&amount=${msatsAmount}&comment=${encodeURIComponent(note || "Boost con Bitflow")}`
         )
         
         if (!response.ok) {
