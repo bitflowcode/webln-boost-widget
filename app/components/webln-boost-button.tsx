@@ -104,8 +104,14 @@ export default function WebLNBoostButton({
           throw new Error(`Error al generar factura: ${response.status}`)
         }
 
-        const data = await response.json() as { pr: string }
-        invoicePr = data.pr
+        const data = await response.json()
+        console.log("Respuesta de Alby:", data)
+        
+        if (!data.pr || typeof data.pr !== 'string') {
+          throw new Error("La factura no se generó correctamente")
+        }
+
+        invoicePr = data.pr as string
         
         await webln.sendPayment(invoicePr)
         resetToInitialState()
