@@ -76,13 +76,13 @@ export default function CreateWidget() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#1a1a1a] to-[#2a2a2a] text-white p-4 md:p-8">
+    <div className="min-h-screen bg-gradient-to-b from-[#1a1a1a] to-[#2a2a2a] text-white p-4 md:p-8 overflow-x-hidden">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-4xl font-bold mb-8 text-center">Crea tu Widget de Donación</h1>
         
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="grid lg:grid-cols-2 gap-8">
           {/* Formulario */}
-          <div className="space-y-6">
+          <div className="space-y-6 w-full max-w-xl mx-auto">
             {/* Tipo de Receptor */}
             <div>
               <label className="block text-sm font-medium mb-2">
@@ -163,31 +163,35 @@ export default function CreateWidget() {
           </div>
 
           {/* Vista Previa y Código */}
-          <div className="space-y-6 sticky top-4">
+          <div className="space-y-6 lg:sticky lg:top-4 w-full max-w-xl mx-auto">
             <div>
               <h2 className="text-xl font-bold mb-4">Vista Previa</h2>
-              <div className="border border-gray-600 rounded-lg p-4">
-                <WebLNBoostButton
-                  receiverType={config.receiverType}
-                  receiver={config.receiver || RECIPIENT_ADDRESS}
-                  amounts={config.amounts.split(',').map(Number)}
-                  labels={config.labels.split(',')}
-                  theme={config.theme}
-                />
+              <div className="border border-gray-600 rounded-lg p-4 overflow-hidden">
+                <div className="transform scale-[0.8] origin-top">
+                  <WebLNBoostButton
+                    receiverType={config.receiverType}
+                    receiver={config.receiver || RECIPIENT_ADDRESS}
+                    amounts={config.amounts.split(',').map(Number)}
+                    labels={config.labels.split(',')}
+                    theme={config.theme}
+                  />
+                </div>
               </div>
             </div>
 
             <div className="mt-8">
               <h2 className="text-xl font-bold mb-4">Código para tu Web</h2>
-              <pre className="bg-[#2d2d2d] p-4 rounded-lg overflow-x-auto whitespace-pre-wrap">
-                <code className="text-sm break-all">{generateWidgetCode()}</code>
-              </pre>
-              <button
-                onClick={handleCopyCode}
-                className="mt-4 bg-[#FF8C00] text-white px-6 py-2 rounded-lg hover:bg-[#FF8C00]/90 transition-colors"
-              >
-                Copiar Código
-              </button>
+              <div className="relative">
+                <pre className="bg-[#2d2d2d] p-4 rounded-lg overflow-x-auto whitespace-pre-wrap">
+                  <code className="text-sm break-all">{generateWidgetCode()}</code>
+                </pre>
+                <button
+                  onClick={handleCopyCode}
+                  className="absolute top-2 right-2 bg-[#FF8C00] text-white px-3 py-1 rounded-lg hover:bg-[#FF8C00]/90 transition-colors text-sm"
+                >
+                  Copiar
+                </button>
+              </div>
             </div>
           </div>
         </div>
