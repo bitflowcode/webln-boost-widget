@@ -307,21 +307,31 @@ export default function WebLNBoostButton({
 
       case "qr":
         return (
-          <>
-            <div className="bg-white p-4 rounded-lg mb-6">
-              <QRCodeSVG value={invoice} size={256} />
+          <div className="w-full flex flex-col items-center">
+            <div className="bg-white p-4 rounded-lg mb-4">
+              <QRCodeSVG value={invoice} size={200} />
             </div>
-            <div className="w-full max-w-[320px] bg-[#2d2d2d] p-4 rounded-lg mb-6 break-all">
-              <p className="text-xs text-white/70 mb-2">Lightning Invoice:</p>
-              <p className="text-sm text-white font-mono">{invoice}</p>
+            <div className="w-full bg-[#2d2d2d] p-3 rounded-lg mb-4">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs text-white/70">Lightning Invoice:</p>
+                <button
+                  onClick={() => navigator.clipboard.writeText(invoice)}
+                  className="text-xs bg-white/10 hover:bg-white/20 text-white px-2 py-1 rounded transition-colors"
+                >
+                  Copiar
+                </button>
+              </div>
+              <p className="text-[10px] text-white/90 font-mono truncate">
+                {invoice}
+              </p>
             </div>
             <Button
               onClick={resetToInitialState}
-              className="bg-white hover:bg-white/90 text-[#3B81A2] font-bold text-xl px-8 py-4 rounded-full shadow-[0_8px_16px_rgba(0,0,0,0.15)] hover:shadow-[0_12px_24px_rgba(0,0,0,0.2)] transition-all duration-200"
+              className="bg-white hover:bg-white/90 text-[#3B81A2] font-bold text-lg px-6 py-2 rounded-full shadow-[0_8px_16px_rgba(0,0,0,0.15)] hover:shadow-[0_12px_24px_rgba(0,0,0,0.2)] transition-all duration-200"
             >
               Done?
             </Button>
-          </>
+          </div>
         )
     }
   }
@@ -336,7 +346,7 @@ export default function WebLNBoostButton({
     <div className="flex flex-col items-center gap-8">
       <div className="w-[410px] h-[410px]">
         <div 
-          className={`flex flex-col items-center justify-center w-full h-full rounded-3xl p-6 space-y-4 shadow-[0_20px_40px_rgba(0,0,0,0.2)] transition-all duration-300`}
+          className="flex flex-col items-center justify-center w-full h-full rounded-3xl p-6 space-y-4 shadow-[0_20px_40px_rgba(0,0,0,0.2)] transition-all duration-300 overflow-hidden"
           style={{ backgroundColor: themeColors[theme as keyof typeof themeColors] || themeColors.orange }}
         >
           {renderStep()}
