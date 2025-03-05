@@ -21,7 +21,6 @@ export default function Home() {
         <h2 className="text-3xl font-bold text-center mb-12">Pruébalo</h2>
         <div className="flex justify-center">
           <WebLNBoostButton
-            defaultAmount={100}
             incrementSpeed={50}
             incrementValue={10}
           />

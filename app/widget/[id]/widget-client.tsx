@@ -59,7 +59,6 @@ const WidgetClient: FC<WidgetClientProps> = ({ id }) => {
       <WebLNBoostButton
         receiverType={config.receiverType}
         receiver={config.receiver}
-        defaultAmount={amounts[0]}
         amounts={amounts}
         labels={labels}
         theme={config.theme}
