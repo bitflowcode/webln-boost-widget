@@ -82,7 +82,7 @@ export default function CreateWidget() {
         
         <div className="grid lg:grid-cols-2 gap-8">
           {/* Formulario */}
-          <div className="space-y-6 w-full max-w-xl mx-auto px-2">
+          <div className="space-y-6 w-full max-w-md mx-auto">
             {/* Tipo de Receptor */}
             <div>
               <label className="block text-sm font-medium mb-2">
@@ -163,11 +163,11 @@ export default function CreateWidget() {
           </div>
 
           {/* Vista Previa y Código */}
-          <div className="space-y-6 lg:sticky lg:top-4 w-full max-w-xl mx-auto px-2">
+          <div className="space-y-6 w-full max-w-md mx-auto">
             <div>
               <h2 className="text-xl font-bold mb-4">Vista Previa</h2>
-              <div className="border border-gray-600 rounded-lg p-4 overflow-hidden">
-                <div className="transform scale-[0.8] origin-top-left">
+              <div className="border border-gray-600 rounded-lg p-4 flex justify-center items-center min-h-[500px]">
+                <div className="transform scale-[0.8] origin-center">
                   <WebLNBoostButton
                     receiverType={config.receiverType}
                     receiver={config.receiver || RECIPIENT_ADDRESS}
@@ -182,8 +182,8 @@ export default function CreateWidget() {
             <div className="mt-8">
               <h2 className="text-xl font-bold mb-4">Código para tu Web</h2>
               <div className="relative">
-                <pre className="bg-[#2d2d2d] p-4 rounded-lg overflow-x-auto whitespace-pre-wrap text-sm">
-                  <code className="break-all">{generateWidgetCode()}</code>
+                <pre className="bg-[#2d2d2d] p-4 rounded-lg overflow-x-auto text-sm">
+                  <code className="whitespace-pre-wrap break-all">{generateWidgetCode()}</code>
                 </pre>
                 <button
                   onClick={handleCopyCode}

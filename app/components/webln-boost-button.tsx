@@ -224,13 +224,14 @@ export default function WebLNBoostButton({
                 <Button
                   key={preset}
                   onClick={() => handleAmountSelect(preset)}
-                  className={`rounded-full px-4 py-2 flex-1 text-sm ${
+                  className={`rounded-full px-4 py-2 flex-1 text-sm flex flex-col items-center ${
                     amount === preset
                       ? "bg-white text-[#3B81A2]"
                       : "bg-transparent text-white border-2 border-white"
                   }`}
                 >
-                  {labels[index] || preset}
+                  <span>{labels[index] || preset}</span>
+                  <span className="text-xs mt-1">{preset} sats</span>
                 </Button>
               ))}
             </div>
@@ -253,7 +254,7 @@ export default function WebLNBoostButton({
                 type="number"
                 inputMode="numeric"
                 pattern="[0-9]*"
-                value={amount === defaultAmount ? "" : amount}
+                value={amount}
                 onChange={handleCustomAmount}
                 placeholder="Enter an amount"
                 className="w-full px-4 py-2 mb-4 rounded-full text-center text-lg text-[#3B81A2] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#3B81A2]"
