@@ -28,13 +28,15 @@ interface LNURLPayResponse {
   minSendable: number
   metadata: string
   tag: string
+  pr?: string
+  invoice?: string
 }
 
-interface LNURLPayValues {
-  callback: string
-  fixed: string
-  min: number
-  max: number
+interface LNURLInvoiceResponse {
+  pr?: string
+  invoice?: string
+  status?: string
+  reason?: string
 }
 
 // Función para decodificar LNURL
@@ -214,9 +216,8 @@ export default function WebLNBoostButton({
           callbackUrl.searchParams.append('amount', msatsAmount.toString())
           
           // Solo agregar el comentario si hay uno y si el servicio lo acepta
-          let firstTry = true
           let invoiceResponse: Response
-          let invoiceData: any
+          let invoiceData: LNURLInvoiceResponse
           
           try {
             // Primer intento con comentario si existe
@@ -228,7 +229,6 @@ export default function WebLNBoostButton({
             
             // Si hay un error relacionado con el comentario, intentar de nuevo sin él
             if (invoiceData.status === 'ERROR' && invoiceData.reason?.toLowerCase().includes('comment')) {
-              firstTry = false
               console.log('El servicio no acepta comentarios, reintentando sin comentario')
               const retryUrl = new URL(lnurlPayParams.callback)
               retryUrl.searchParams.append('amount', msatsAmount.toString())
