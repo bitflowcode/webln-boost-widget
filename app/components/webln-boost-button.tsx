@@ -12,7 +12,6 @@ const RECIPIENT_ADDRESS = "bitflowz@getalby.com"
 interface WebLNBoostButtonProps {
   receiverType?: 'lightning' | 'lnurl' | 'node'
   receiver?: string
-  defaultAmount?: number
   amounts?: number[]
   labels?: string[]
   theme?: string
@@ -25,7 +24,6 @@ type Step = "initial" | "amount" | "note" | "qr" | "processing"
 export default function WebLNBoostButton({
   receiverType = 'lightning',
   receiver = RECIPIENT_ADDRESS,
-  defaultAmount = 0,
   amounts = [21, 100, 1000],
   labels = ['Café', 'Propina', 'Boost'],
   theme = 'orange',
