@@ -6,6 +6,7 @@ import { Button } from "@/app/components/ui/button"
 import { QRCodeSVG } from "qrcode.react"
 import { WebLNGuide } from "./webln-guide"
 import Image from "next/image"
+import { bech32 } from 'bech32'
 
 const RECIPIENT_ADDRESS = "bitflowz@getalby.com"
 
@@ -20,6 +21,57 @@ interface WebLNBoostButtonProps {
 }
 
 type Step = "initial" | "amount" | "note" | "qr" | "processing"
+
+interface LNURLPayResponse {
+  callback: string
+  maxSendable: number
+  minSendable: number
+  metadata: string
+  tag: string
+}
+
+interface LNURLPayValues {
+  callback: string
+  fixed: string
+  min: number
+  max: number
+}
+
+// Función para decodificar LNURL
+const decodeLNURL = (lnurl: string): string => {
+  try {
+    // Si ya es una URL, devolverla directamente
+    if (lnurl.toLowerCase().startsWith('http')) {
+      return lnurl
+    }
+
+    // Asegurarnos de que tenemos el prefijo LNURL
+    let bech32String = lnurl.toLowerCase()
+    if (!bech32String.startsWith('lnurl')) {
+      bech32String = 'lnurl' + bech32String
+    }
+    
+    // Decodificar bech32
+    const decoded = bech32.decode(bech32String, 1000)
+    const words = bech32.fromWords(decoded.words)
+    
+    // Convertir a string
+    const urlBytes = new Uint8Array(words)
+    const url = new TextDecoder().decode(urlBytes)
+    
+    return url
+  } catch (error) {
+    console.error('Error decodificando LNURL:', error)
+    
+    // Intentar usar la API de Alby como fallback para resolver la LNURL
+    try {
+      return `https://api.getalby.com/decode/${lnurl}`
+    } catch (fallbackError) {
+      console.error('Error en fallback de decodificación:', fallbackError)
+      throw new Error('LNURL inválida')
+    }
+  }
+}
 
 export default function WebLNBoostButton({
   receiverType = 'lightning',
@@ -117,38 +169,132 @@ export default function WebLNBoostButton({
     const msatsAmount = Math.round(amount * 1000)
     let response: Response
     
-    switch (receiverType) {
-      case 'lightning':
-        response = await fetch(
-          `https://api.getalby.com/lnurl/generate-invoice?ln=${receiver}&amount=${msatsAmount}&comment=${encodeURIComponent(note || "Boost con Bitflow")}`
-        )
-        break
-      case 'lnurl':
-        response = await fetch(
-          `${receiver}?amount=${msatsAmount}&comment=${encodeURIComponent(note || "Boost con Bitflow")}`
-        )
-        break
-      case 'node':
-        response = await fetch(
-          `https://api.getalby.com/payments/keysend?node_id=${receiver}&amount=${msatsAmount}&comment=${encodeURIComponent(note || "Boost con Bitflow")}`
-        )
-        break
-      default:
-        throw new Error("Tipo de receptor no válido")
-    }
-    
-    if (!response.ok) {
-      throw new Error(`Error al generar factura: ${response.status}`)
-    }
+    try {
+      if (receiverType === 'lnurl') {
+        try {
+          console.log('Procesando LNURL:', receiver)
+          
+          // 1. Decodificar la LNURL
+          let decodedUrl: string
+          
+          if (receiver.toLowerCase().startsWith('lnurl')) {
+            decodedUrl = decodeLNURL(receiver)
+          } else {
+            decodedUrl = receiver
+          }
+          
+          console.log('URL decodificada o directa:', decodedUrl)
+          
+          // 2. Hacer la primera solicitud para obtener los parámetros del servicio
+          console.log('Haciendo solicitud inicial a:', decodedUrl)
+          const initialResponse = await fetch(decodedUrl)
+          
+          if (!initialResponse.ok) {
+            console.error('Error en respuesta inicial:', initialResponse.status)
+            throw new Error(`Error al obtener parámetros LNURL: ${initialResponse.status}`)
+          }
+          
+          const lnurlPayParams = await initialResponse.json() as LNURLPayResponse
+          console.log('Parámetros LNURL recibidos:', lnurlPayParams)
+          
+          // Verificar que es un endpoint LNURL-pay válido
+          if (!lnurlPayParams.tag || lnurlPayParams.tag !== 'payRequest') {
+            console.error('Tag inválido:', lnurlPayParams.tag)
+            throw new Error('El LNURL proporcionado no es un endpoint de pago válido')
+          }
+          
+          // Verificar que el monto está dentro de los límites
+          console.log(`Verificando monto ${msatsAmount} entre ${lnurlPayParams.minSendable} y ${lnurlPayParams.maxSendable}`)
+          if (msatsAmount < lnurlPayParams.minSendable || msatsAmount > lnurlPayParams.maxSendable) {
+            throw new Error(`El monto debe estar entre ${lnurlPayParams.minSendable / 1000} y ${lnurlPayParams.maxSendable / 1000} sats`)
+          }
+          
+          // 3. Hacer la segunda solicitud para obtener la factura
+          const callbackUrl = new URL(lnurlPayParams.callback)
+          callbackUrl.searchParams.append('amount', msatsAmount.toString())
+          
+          // Solo agregar el comentario si hay uno y si el servicio lo acepta
+          let firstTry = true
+          let invoiceResponse: Response
+          let invoiceData: any
+          
+          try {
+            // Primer intento con comentario si existe
+            if (note) {
+              callbackUrl.searchParams.append('comment', note)
+            }
+            invoiceResponse = await fetch(callbackUrl.toString())
+            invoiceData = await invoiceResponse.json()
+            
+            // Si hay un error relacionado con el comentario, intentar de nuevo sin él
+            if (invoiceData.status === 'ERROR' && invoiceData.reason?.toLowerCase().includes('comment')) {
+              firstTry = false
+              console.log('El servicio no acepta comentarios, reintentando sin comentario')
+              const retryUrl = new URL(lnurlPayParams.callback)
+              retryUrl.searchParams.append('amount', msatsAmount.toString())
+              invoiceResponse = await fetch(retryUrl.toString())
+              invoiceData = await invoiceResponse.json()
+            }
+          } catch (error) {
+            console.error('Error al obtener la factura:', error)
+            throw new Error('Error al generar la factura LNURL')
+          }
+          
+          if (!invoiceResponse.ok) {
+            console.error('Error en respuesta de factura:', invoiceResponse.status)
+            throw new Error(`Error al generar la factura LNURL: ${invoiceResponse.status}`)
+          }
+          
+          console.log('Datos de factura recibidos:', invoiceData)
+          
+          // Verificar diferentes formatos de respuesta según el estándar LNURL
+          if (invoiceData.pr) {
+            console.log('Factura encontrada en pr')
+            return invoiceData.pr
+          } else if (invoiceData.invoice) {
+            console.log('Factura encontrada en invoice')
+            return invoiceData.invoice
+          } else {
+            console.error('No se encontró factura en la respuesta:', invoiceData)
+            throw new Error('No se pudo obtener la factura del servicio LNURL')
+          }
+        } catch (error) {
+          console.error('Error detallado en el proceso LNURL:', error)
+          throw new Error(`Error procesando LNURL: ${error instanceof Error ? error.message : 'Error desconocido'}`)
+        }
+      }
+      
+      switch (receiverType) {
+        case 'lightning':
+          response = await fetch(
+            `https://api.getalby.com/lnurl/generate-invoice?ln=${receiver}&amount=${msatsAmount}&comment=${encodeURIComponent(note || "Boost con Bitflow")}`
+          )
+          break
+        case 'node':
+          response = await fetch(
+            `https://api.getalby.com/payments/keysend?node_id=${receiver}&amount=${msatsAmount}&comment=${encodeURIComponent(note || "Boost con Bitflow")}`
+          )
+          break
+        default:
+          throw new Error("Tipo de receptor no válido")
+      }
+      
+      if (!response.ok) {
+        throw new Error(`Error al generar factura: ${response.status}`)
+      }
 
-    const data = await response.json()
-    console.log("Respuesta:", data)
-    
-    if (!data.invoice?.pr || typeof data.invoice.pr !== 'string') {
-      throw new Error("La factura no se generó correctamente")
+      const data = await response.json()
+      console.log("Respuesta:", data)
+      
+      if (!data.invoice?.pr || typeof data.invoice.pr !== 'string') {
+        throw new Error("La factura no se generó correctamente")
+      }
+      return data.invoice.pr as string
+      
+    } catch (error) {
+      console.error("Error en generateInvoice:", error)
+      throw error
     }
-
-    return data.invoice.pr as string
   }
 
   const handleBoost = async () => {
@@ -156,10 +302,14 @@ export default function WebLNBoostButton({
 
     try {
       setIsProcessing(true)
+      console.log('Iniciando proceso de pago...')
+      
       const invoicePr = await generateInvoice()
+      console.log('Factura generada:', invoicePr)
 
       // En móvil o sin WebLN, ir directo al QR
       if (isMobile || !webln) {
+        console.log('Mostrando QR (móvil o sin WebLN)')
         setInvoice(invoicePr)
         setStep("qr")
         return
@@ -167,21 +317,25 @@ export default function WebLNBoostButton({
 
       // En desktop con WebLN
       try {
+        console.log('Intentando pago con WebLN')
         await webln.sendPayment(invoicePr)
+        console.log('Pago completado con éxito')
         resetToInitialState()
       } catch (error) {
-        console.error("Error al enviar pago directo:", error)
+        console.error("Error detallado en pago WebLN:", error)
         if (error instanceof Error && error.message?.includes('User rejected')) {
           setWeblnError("Pago cancelado por el usuario.")
           setStep("initial")
         } else {
+          console.log('Mostrando QR después de error WebLN')
           setInvoice(invoicePr)
           setStep("qr")
         }
       }
     } catch (error: unknown) {
-      console.error("Error:", error)
-      setWeblnError("Error al generar la factura. Por favor, intenta de nuevo.")
+      console.error("Error detallado en handleBoost:", error)
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
+      setWeblnError(`Error al generar la factura: ${errorMessage}`)
       setStep("initial")
     } finally {
       setIsProcessing(false)
