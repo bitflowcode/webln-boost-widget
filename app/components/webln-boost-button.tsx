@@ -25,7 +25,7 @@ type Step = "initial" | "amount" | "note" | "qr" | "processing"
 export default function WebLNBoostButton({
   receiverType = 'lightning',
   receiver = RECIPIENT_ADDRESS,
-  defaultAmount = 100,
+  defaultAmount = 0,
   amounts = [21, 100, 1000],
   labels = ['Café', 'Propina', 'Boost'],
   theme = 'orange',
@@ -33,7 +33,7 @@ export default function WebLNBoostButton({
   incrementValue = 10,
 }: WebLNBoostButtonProps) {
   const [step, setStep] = useState<Step>("initial")
-  const [amount, setAmount] = useState<number>(defaultAmount)
+  const [amount, setAmount] = useState<number>(0)
   const [note, setNote] = useState<string>("")
   const [webln, setWebln] = useState<WebLNProvider | null>(null)
   const [weblnError, setWeblnError] = useState<string>("")
@@ -99,7 +99,7 @@ export default function WebLNBoostButton({
   }
 
   const handleCustomAmount = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value === "" ? defaultAmount : parseInt(event.target.value)
+    const value = event.target.value === "" ? 0 : parseInt(event.target.value)
     if (!isNaN(value)) {
       setAmount(value)
     }
@@ -110,7 +110,7 @@ export default function WebLNBoostButton({
   }
 
   const resetToInitialState = () => {
-    setAmount(defaultAmount)
+    setAmount(0)
     setNote("")
     setStep("initial")
   }
@@ -224,13 +224,13 @@ export default function WebLNBoostButton({
                 <Button
                   key={preset}
                   onClick={() => handleAmountSelect(preset)}
-                  className={`rounded-full px-4 py-2 flex-1 text-sm flex flex-col items-center ${
+                  className={`rounded-full px-4 py-3 flex-1 text-sm flex flex-col items-center leading-tight h-[70px] justify-center ${
                     amount === preset
                       ? "bg-white text-[#3B81A2]"
                       : "bg-transparent text-white border-2 border-white"
                   }`}
                 >
-                  <span>{labels[index] || preset}</span>
+                  <span className="font-medium">{labels[index] || preset}</span>
                   <span className="text-xs mt-1">{preset} sats</span>
                 </Button>
               ))}
@@ -254,7 +254,7 @@ export default function WebLNBoostButton({
                 type="number"
                 inputMode="numeric"
                 pattern="[0-9]*"
-                value={amount}
+                value={amount || ""}
                 onChange={handleCustomAmount}
                 placeholder="Enter an amount"
                 className="w-full px-4 py-2 mb-4 rounded-full text-center text-lg text-[#3B81A2] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#3B81A2]"
