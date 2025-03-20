@@ -18,14 +18,11 @@ function generateRobohashUrl(seed: string | undefined, set: string | undefined):
 
 export default function RoboAvatar({ seed, set, size = 128, className = '' }: RoboAvatarProps) {
   const [isClient, setIsClient] = useState(false)
-  const [avatarSeed, setAvatarSeed] = useState<string>('')
   const [imageError, setImageError] = useState(false)
 
   useEffect(() => {
     setIsClient(true)
-    const finalSeed = seed?.trim() || Math.random().toString(36).substring(2, 10)
-    setAvatarSeed(finalSeed)
-  }, [seed])
+  }, [])
 
   const imageUrl = generateRobohashUrl(seed, set)
 

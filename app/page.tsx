@@ -1,5 +1,7 @@
-import Link from 'next/link'
-import WebLNBoostButton from './components/webln-boost-button'
+import { Button } from "./components/ui/button"
+import { Card } from "./components/ui/card"
+import WebLNBoostButton from "./components/webln-boost-button"
+import Image from "next/image"
 
 export default function Home() {
   return (

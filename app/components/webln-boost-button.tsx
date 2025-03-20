@@ -14,10 +14,14 @@ import CustomAvatar from "./ui/custom-avatar"
 const RECIPIENT_ADDRESS = "bitflowz@getalby.com"
 
 interface WebLNBoostButtonProps {
-  receiverType?: 'lightning' | 'lnurl' | 'node'
-  receiver?: string
-  amounts?: number[]
-  labels?: string[]
+  receiverType: 'lightning' | 'lnurl' | 'node'
+  receiver: string
+  amounts: number[]
+  labels: string[] | {
+    amount: string
+    note: string
+    submit: string
+  }
   theme?: string
   incrementSpeed?: number
   incrementValue?: number
@@ -57,6 +61,13 @@ const decodeLNURL = (lnurl: string): string => {
     // URL directa
     return lnurl
   }
+}
+
+const getLabel = (labels: string[] | { amount: string, note: string, submit: string }, index: number): string => {
+  if (Array.isArray(labels)) {
+    return labels[index] || ''
+  }
+  return ''
 }
 
 export default function WebLNBoostButton({
@@ -136,8 +147,8 @@ export default function WebLNBoostButton({
           setWebln(provider)
           setWeblnError("")
         }
-      } catch (err) {
-        console.error("WebLN no está disponible:", err)
+      } catch (initError) {
+        console.error("WebLN no está disponible:", initError)
         setWebln(null)
         if (!isMobile) {
           setWeblnError("No se detectó una billetera compatible con WebLN")
@@ -264,8 +275,8 @@ export default function WebLNBoostButton({
               invoiceResponse = await fetch(retryUrl.toString())
               invoiceData = await invoiceResponse.json()
             }
-          } catch (error) {
-            console.error('Error al obtener la factura:', error)
+          } catch (invoiceError) {
+            console.error('Error al obtener la factura:', invoiceError)
             throw new Error('Error al generar la factura LNURL')
           }
           
@@ -286,9 +297,9 @@ export default function WebLNBoostButton({
             console.error('No se encontró factura en la respuesta:', invoiceData)
             throw new Error('No se pudo obtener la factura del servicio LNURL')
           }
-        } catch (error) {
-          console.error('Error detallado en el proceso LNURL:', error)
-          throw new Error(`Error procesando LNURL: ${error instanceof Error ? error.message : 'Error desconocido'}`)
+        } catch (lnurlError) {
+          console.error('Error detallado en el proceso LNURL:', lnurlError)
+          throw new Error(`Error procesando LNURL: ${lnurlError instanceof Error ? lnurlError.message : 'Error desconocido'}`)
         }
       }
       
@@ -319,9 +330,9 @@ export default function WebLNBoostButton({
       }
       return data.invoice.pr as string
       
-    } catch (error) {
-      console.error("Error en generateInvoice:", error)
-      throw error
+    } catch (generateError) {
+      console.error("Error en generateInvoice:", generateError)
+      throw generateError
     }
   }
 
@@ -440,7 +451,7 @@ export default function WebLNBoostButton({
                   }`}
                   style={amount === preset ? { color: currentThemeColor } : {}}
                 >
-                  <span className="font-medium">{labels[index] || preset}</span>
+                  <span className="font-medium">{getLabel(labels, index) || preset}</span>
                   <span className="text-xs mt-1">{preset} sats</span>
                 </Button>
               ))}
