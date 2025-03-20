@@ -1,8 +1,7 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import WebLNBoostButton from '@/app/components/webln-boost-button'
-import RoboAvatar from '@/app/components/ui/robo-avatar'
 
 const RECIPIENT_ADDRESS = "bitflowz@getalby.com"
 
@@ -15,57 +14,31 @@ interface WidgetConfig {
   amounts: string
   labels: string
   theme: string
-  // Nuevos campos para avatar
   useCustomImage: boolean
   image?: string
   avatarSeed?: string
   avatarSet?: AvatarSet
 }
 
-export default function CreatePage() {
-  const [config, setConfig] = useState<WidgetConfig>({
-    receiverType: 'lightning',
-    receiver: RECIPIENT_ADDRESS,
-    amounts: '21,100,1000',
-    labels: 'Café,Propina,Boost',
-    theme: 'orange',
-    useCustomImage: false,
-    avatarSeed: Math.random().toString(36).substring(7),
-    avatarSet: 'set1'
-  })
+const defaultConfig: WidgetConfig = {
+  receiverType: 'lightning',
+  receiver: RECIPIENT_ADDRESS,
+  amounts: '21,100,1000',
+  labels: 'Café,Propina,Boost',
+  theme: 'orange',
+  useCustomImage: false,
+  avatarSeed: Math.random().toString(36).substring(7),
+  avatarSet: 'set1'
+}
 
-  const generateNewAvatar = () => {
-    setConfig(prev => ({
-      ...prev,
-      avatarSeed: Math.random().toString(36).substring(7)
-    }))
-  }
+export default function CreatePage() {
+  const [config, setConfig] = useState<WidgetConfig>(defaultConfig)
 
   const handleConfigChange = (field: keyof WidgetConfig, value: string | boolean) => {
     setConfig(prev => ({
       ...prev,
       [field]: value
     }))
-  }
-
-  const getConfigString = () => {
-    const exportConfig = {
-      ...config,
-      amounts: config.amounts.split(',').map(Number),
-      labels: config.labels.split(',')
-    }
-    return JSON.stringify(exportConfig, null, 2)
-  }
-
-  const copyCode = () => {
-    const exportConfig = {
-      ...config,
-      amounts: config.amounts.split(',').map(Number),
-      labels: config.labels.split(',')
-    }
-    const code = `<script src="https://bitflow.site/widget.js"></script>
-<div id="bitflow-widget" data-config='${JSON.stringify(exportConfig)}'></div>`
-    navigator.clipboard.writeText(code)
   }
 
   return (
@@ -191,7 +164,7 @@ export default function CreatePage() {
                     </label>
                     <button
                       type="button"
-                      onClick={generateNewAvatar}
+                      onClick={() => handleConfigChange('avatarSeed', Math.random().toString(36).substring(7))}
                       className="px-4 py-1 text-sm bg-gray-100 rounded-md hover:bg-gray-200"
                     >
                       Generar Nuevo Avatar
@@ -247,7 +220,15 @@ export default function CreatePage() {
               </pre>
               <button
                 type="button"
-                onClick={copyCode}
+                onClick={() => {
+                  const code = `<script src="https://bitflow.site/widget.js"></script>
+<div id="bitflow-widget" data-config='${JSON.stringify({
+  ...config,
+  amounts: config.amounts.split(',').map(Number),
+  labels: config.labels.split(',')
+})}'></div>`;
+                  navigator.clipboard.writeText(code);
+                }}
                 className="absolute top-2 right-2 px-3 py-1 text-sm bg-white rounded shadow hover:bg-gray-50"
               >
                 Copiar

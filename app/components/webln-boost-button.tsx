@@ -81,6 +81,7 @@ export default function WebLNBoostButton({
   const [isMobile, setIsMobile] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
   const [imageError, setImageError] = useState(false)
+  const [validationError, setValidationError] = useState<string>("")
 
   useEffect(() => {
     console.log('WebLNBoostButton props:', { 
@@ -175,6 +176,14 @@ export default function WebLNBoostButton({
       };
     }
   }, [image]);
+
+  useEffect(() => {
+    if (!receiver) {
+      setValidationError("Por favor, ingresa una dirección de receptor")
+    } else {
+      setValidationError("")
+    }
+  }, [receiver])
 
   const handleAmountSelect = (selectedAmount: number) => {
     if (selectedAmount <= 0) return
