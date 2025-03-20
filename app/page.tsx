@@ -1,7 +1,4 @@
-import { Button } from "./components/ui/button"
-import { Card } from "./components/ui/card"
 import WebLNBoostButton from "./components/webln-boost-button"
-import Image from "next/image"
 
 export default function Home() {
   return (
@@ -23,6 +20,10 @@ export default function Home() {
         <h2 className="text-3xl font-bold text-center mb-12">Pruébalo</h2>
         <div className="flex justify-center">
           <WebLNBoostButton
+            receiverType="lightning"
+            receiver="bitflowz@getalby.com"
+            amounts={[21, 100, 1000]}
+            labels={['Café', 'Propina', 'Boost']}
             image="/assets/images/bitflow-avatar.png"
             theme="orange"
           />

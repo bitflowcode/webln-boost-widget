@@ -5,11 +5,9 @@ import { requestProvider, type WebLNProvider } from "webln"
 import { Button } from "@/app/components/ui/button"
 import { QRCodeSVG } from "qrcode.react"
 import { WebLNGuide } from "./webln-guide"
-import Image from "next/image"
-import { bech32 } from 'bech32'
 import RoboAvatar from "./ui/robo-avatar"
 import CustomAvatar from "./ui/custom-avatar"
-
+import { bech32 } from 'bech32'
 
 const RECIPIENT_ADDRESS = "bitflowz@getalby.com"
 
@@ -91,7 +89,6 @@ export default function WebLNBoostButton({
   const [isHolding, setIsHolding] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
-  const [imageError, setImageError] = useState(false)
   const [isClient, setIsClient] = useState(false)
 
   useEffect(() => {
@@ -108,7 +105,12 @@ export default function WebLNBoostButton({
     
     // Reset imageError when image url changes
     if (image) {
-      setImageError(false);
+      // Precargar la imagen para detectar errores temprano
+      const img = new window.Image();
+      img.src = image;
+      img.onerror = () => {
+        console.error('Error precargando imagen:', image);
+      };
     }
     
     // Log more detailed information about the avatar values
@@ -173,20 +175,6 @@ export default function WebLNBoostButton({
       }
     }
   }, [isHolding, incrementValue, incrementSpeed])
-
-  useEffect(() => {
-    // Resetear el error de imagen cuando cambia la URL
-    if (image) {
-      setImageError(false);
-      // Precargar la imagen para detectar errores temprano
-      const img = new window.Image();
-      img.src = image;
-      img.onerror = () => {
-        console.error('Error precargando imagen:', image);
-        setImageError(true);
-      };
-    }
-  }, [image]);
 
   useEffect(() => {
     setIsClient(true)

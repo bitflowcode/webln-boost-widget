@@ -78,7 +78,7 @@ const WidgetClient: FC<WidgetClientProps> = ({ id }) => {
       try {
         // Método estándar
         decodedConfig = JSON.parse(atob(id));
-      } catch (_) {
+      } catch (decodeError) {
         // Método alternativo para URL-safe
         const fixedId = id.replace(/-/g, '+').replace(/_/g, '/');
         decodedConfig = JSON.parse(atob(fixedId));

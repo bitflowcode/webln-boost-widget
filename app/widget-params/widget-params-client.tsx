@@ -119,7 +119,7 @@ const WidgetParamsClient: FC<WidgetParamsClientProps> = ({ params }) => {
     })
     
     setIsLoading(false)
-  }, [params])
+  }, [params, getParamAsBoolean])
 
   if (isLoading) {
     return <div>Cargando...</div>
