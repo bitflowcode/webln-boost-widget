@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import WebLNBoostButton from '@/app/components/webln-boost-button'
 
 const RECIPIENT_ADDRESS = "bitflowz@getalby.com"
@@ -27,18 +27,39 @@ const defaultConfig: WidgetConfig = {
   labels: 'Café,Propina,Boost',
   theme: 'orange',
   useCustomImage: false,
-  avatarSeed: Math.random().toString(36).substring(7),
+  avatarSeed: 'default',
   avatarSet: 'set1'
 }
 
 export default function CreatePage() {
+  const [isClient, setIsClient] = useState(false)
   const [config, setConfig] = useState<WidgetConfig>(defaultConfig)
+
+  useEffect(() => {
+    setIsClient(true)
+    // Generar un seed aleatorio solo en el cliente
+    setConfig(prev => ({
+      ...prev,
+      avatarSeed: Math.random().toString(36).substring(7)
+    }))
+  }, [])
 
   const handleConfigChange = (field: keyof WidgetConfig, value: string | boolean) => {
     setConfig(prev => ({
       ...prev,
       [field]: value
     }))
+  }
+
+  // No renderizar el widget durante SSR
+  if (!isClient) {
+    return (
+      <main className="min-h-screen bg-white py-12 px-4">
+        <div className="max-w-3xl mx-auto">
+          <h1 className="text-4xl font-bold mb-8">Cargando...</h1>
+        </div>
+      </main>
+    )
   }
 
   return (
