@@ -1,0 +1,28 @@
+{
+  "routes": [
+    {
+      "src": "/widget.js",
+      "dest": "/_next/static/widget.js",
+      "headers": {
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "Access-Control-Allow-Origin": "*"
+      }
+    },
+    {
+      "src": "/widget.css",
+      "dest": "/_next/static/widget.css",
+      "headers": {
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "Access-Control-Allow-Origin": "*"
+      }
+    },
+    {
+      "src": "/widget.bundle.js",
+      "dest": "/_next/static/widget.bundle.js",
+      "headers": {
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "Access-Control-Allow-Origin": "*"
+      }
+    }
+  ]
+} 

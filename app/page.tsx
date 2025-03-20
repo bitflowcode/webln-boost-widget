@@ -8,12 +8,12 @@ export default function Home() {
       <section className="container mx-auto px-4 py-16 text-center">
         <h1 className="text-5xl font-bold mb-6">Bitflow Widget</h1>
         <p className="text-xl mb-8">Acepta propinas y donaciones en Bitcoin Lightning de forma simple y elegante</p>
-        <Link 
+        <a
           href="/create"
-          className="bg-[#FF8C00] text-white px-8 py-3 rounded-full font-bold hover:bg-[#FF8C00]/90 transition-colors"
+          className="bg-[#FF8C00] text-white px-8 py-3 rounded-full font-bold hover:bg-[#FF8C00]/90 transition-colors inline-block"
         >
           Crear Mi Widget
-        </Link>
+        </a>
       </section>
 
       {/* Demo Section */}
@@ -21,8 +21,8 @@ export default function Home() {
         <h2 className="text-3xl font-bold text-center mb-12">Pruébalo</h2>
         <div className="flex justify-center">
           <WebLNBoostButton
-            incrementSpeed={50}
-            incrementValue={10}
+            image="/assets/images/bitflow-avatar.png"
+            theme="orange"
           />
         </div>
       </section>
@@ -32,7 +32,7 @@ export default function Home() {
         <h2 className="text-3xl font-bold text-center mb-12">Características</h2>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
           <div className="bg-[#2d2d2d] p-6 rounded-lg">
-            <h3 className="text-xl font-bold mb-4">🌟 Fácil de Usar</h3>
+            <h3 className="text-xl font-bold mb-4">✨ Fácil de Usar</h3>
             <p>Configura tu widget en minutos y empieza a recibir donaciones</p>
           </div>
           <div className="bg-[#2d2d2d] p-6 rounded-lg">

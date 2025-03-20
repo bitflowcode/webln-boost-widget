@@ -1,11 +1,13 @@
 "use client"
 
-import { useState } from 'react'
-import WebLNBoostButton from '../components/webln-boost-button'
+import { useState, useEffect } from 'react'
+import WebLNBoostButton from '@/app/components/webln-boost-button'
+import RoboAvatar from '@/app/components/ui/robo-avatar'
 
 const RECIPIENT_ADDRESS = "bitflowz@getalby.com"
 
 type ReceiverType = 'lightning' | 'lnurl' | 'node'
+type AvatarSet = 'set1' | 'set2' | 'set3' | 'set4' | 'set5'
 
 interface WidgetConfig {
   receiverType: ReceiverType
@@ -13,189 +15,247 @@ interface WidgetConfig {
   amounts: string
   labels: string
   theme: string
+  // Nuevos campos para avatar
+  useCustomImage: boolean
+  image?: string
+  avatarSeed?: string
+  avatarSet?: AvatarSet
 }
 
-export default function CreateWidget() {
+export default function CreatePage() {
   const [config, setConfig] = useState<WidgetConfig>({
     receiverType: 'lightning',
-    receiver: '',
+    receiver: RECIPIENT_ADDRESS,
     amounts: '21,100,1000',
     labels: 'Café,Propina,Boost',
-    theme: 'orange'
+    theme: 'orange',
+    useCustomImage: false,
+    avatarSeed: Math.random().toString(36).substring(7),
+    avatarSet: 'set1'
   })
 
-  const generateWidgetCode = () => {
-    try {
-      // Validar que los campos requeridos estén llenos
-      if (!config.receiver) {
-        throw new Error('Por favor, ingresa una dirección de receptor')
-      }
-
-      // Validar que los arrays tengan la misma longitud
-      const amountsArray = config.amounts.split(',')
-      const labelsArray = config.labels.split(',')
-      if (amountsArray.length !== labelsArray.length) {
-        throw new Error('La cantidad de montos y etiquetas debe ser igual')
-      }
-
-      // Validar que los montos sean números válidos
-      const amounts = amountsArray.map(a => {
-        const num = parseInt(a.trim())
-        if (isNaN(num)) throw new Error('Los montos deben ser números válidos')
-        return num
-      })
-
-      // Crear objeto de configuración limpio
-      const cleanConfig = {
-        ...config,
-        amounts: amounts.join(','),
-        labels: labelsArray.map(l => l.trim()).join(',')
-      }
-
-      // Codificar config en base64 URL-safe
-      const jsonString = JSON.stringify(cleanConfig)
-      const encodedConfig = btoa(jsonString).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
-      
-      return `<iframe 
-        src="https://www.bitflow.site/widget/${encodedConfig}"
-        width="410" 
-        height="410" 
-        frameborder="0"
-      ></iframe>`
-    } catch (error) {
-      console.error('Error al generar el código:', error)
-      return 'Error: ' + (error instanceof Error ? error.message : 'Error desconocido')
-    }
+  const generateNewAvatar = () => {
+    setConfig(prev => ({
+      ...prev,
+      avatarSeed: Math.random().toString(36).substring(7)
+    }))
   }
 
-  const handleCopyCode = () => {
-    const code = generateWidgetCode()
-    if (!code.startsWith('Error:')) {
-      navigator.clipboard.writeText(code)
+  const handleConfigChange = (field: keyof WidgetConfig, value: string | boolean) => {
+    setConfig(prev => ({
+      ...prev,
+      [field]: value
+    }))
+  }
+
+  const getConfigString = () => {
+    const exportConfig = {
+      ...config,
+      amounts: config.amounts.split(',').map(Number),
+      labels: config.labels.split(',')
     }
+    return JSON.stringify(exportConfig, null, 2)
+  }
+
+  const copyCode = () => {
+    const exportConfig = {
+      ...config,
+      amounts: config.amounts.split(',').map(Number),
+      labels: config.labels.split(',')
+    }
+    const code = `<script src="https://bitflow.site/widget.js"></script>
+<div id="bitflow-widget" data-config='${JSON.stringify(exportConfig)}'></div>`
+    navigator.clipboard.writeText(code)
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#1a1a1a] to-[#2a2a2a] text-white p-4 md:p-8 overflow-x-hidden">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-4xl font-bold mb-8 text-center">Crea tu Widget de Donación</h1>
+    <main className="min-h-screen bg-white py-12 px-4">
+      <div className="max-w-3xl mx-auto">
+        <h1 className="text-4xl font-bold mb-8">Crea tu Widget de Donación</h1>
         
-        <div className="grid lg:grid-cols-2 gap-8">
-          {/* Formulario */}
-          <div className="space-y-6 w-full max-w-md mx-auto">
-            {/* Tipo de Receptor */}
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                Método de Recepción
-              </label>
-              <select 
-                value={config.receiverType}
-                onChange={(e) => setConfig({...config, receiverType: e.target.value as ReceiverType})}
-                className="w-full p-3 bg-[#2d2d2d] rounded-lg border border-gray-600 text-white"
-              >
-                <option value="lightning">Lightning Address</option>
-                <option value="lnurl">LNURL</option>
-                <option value="node">Node ID</option>
-              </select>
-            </div>
-
-            {/* Dirección del Receptor */}
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                {config.receiverType === 'lightning' ? 'Lightning Address' :
-                 config.receiverType === 'lnurl' ? 'LNURL' : 'Node ID'}
-              </label>
-              <input
-                type="text"
-                value={config.receiver}
-                onChange={(e) => setConfig({...config, receiver: e.target.value})}
-                className="w-full p-3 bg-[#2d2d2d] rounded-lg border border-gray-600 text-white"
-                placeholder={
-                  config.receiverType === 'lightning' ? 'tu@direccion.com' :
-                  config.receiverType === 'lnurl' ? 'LNURL1...' : 'Node ID'
-                }
-              />
-            </div>
-
-            {/* Montos Sugeridos */}
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                Montos Sugeridos (separados por coma)
-              </label>
-              <input
-                type="text"
-                value={config.amounts}
-                onChange={(e) => setConfig({...config, amounts: e.target.value})}
-                className="w-full p-3 bg-[#2d2d2d] rounded-lg border border-gray-600 text-white"
-                placeholder="21,100,1000"
-              />
-            </div>
-
-            {/* Etiquetas de Montos */}
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                Etiquetas de Montos (separadas por coma)
-              </label>
-              <input
-                type="text"
-                value={config.labels}
-                onChange={(e) => setConfig({...config, labels: e.target.value})}
-                className="w-full p-3 bg-[#2d2d2d] rounded-lg border border-gray-600 text-white"
-                placeholder="Café,Propina,Boost"
-              />
-            </div>
-
-            {/* Tema */}
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                Color del Tema
-              </label>
-              <select 
-                value={config.theme}
-                onChange={(e) => setConfig({...config, theme: e.target.value})}
-                className="w-full p-3 bg-[#2d2d2d] rounded-lg border border-gray-600 text-white"
-              >
-                <option value="orange">Naranja</option>
-                <option value="blue">Azul</option>
-                <option value="green">Verde</option>
-              </select>
-            </div>
+        <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+          {/* Método de Recepción */}
+          <div>
+            <label className="block text-sm font-medium mb-2">
+              Método de Recepción
+            </label>
+            <select 
+              className="w-full p-2 border rounded-md"
+              value={config.receiverType}
+              onChange={(e) => handleConfigChange('receiverType', e.target.value as ReceiverType)}
+            >
+              <option value="lightning">Lightning Address</option>
+              <option value="lnurl">LNURL</option>
+              <option value="node">Node ID</option>
+            </select>
           </div>
 
-          {/* Vista Previa y Código */}
-          <div className="space-y-6 w-full max-w-md mx-auto">
-            <div>
-              <h2 className="text-xl font-bold mb-4">Vista Previa</h2>
-              <div className="border border-gray-600 rounded-lg p-4 flex justify-center items-center min-h-[500px]">
-                <div className="transform scale-[0.8] origin-center">
-                  <WebLNBoostButton
-                    receiverType={config.receiverType}
-                    receiver={config.receiver || RECIPIENT_ADDRESS}
-                    amounts={config.amounts.split(',').map(Number)}
-                    labels={config.labels.split(',')}
-                    theme={config.theme}
+          {/* Lightning Address */}
+          <div>
+            <label className="block text-sm font-medium mb-2">
+              Lightning Address
+            </label>
+            <input
+              type="text"
+              className="w-full p-2 border rounded-md"
+              placeholder="tu@direccion.com"
+              value={config.receiver}
+              onChange={(e) => handleConfigChange('receiver', e.target.value)}
+            />
+          </div>
+
+          {/* Montos Sugeridos */}
+          <div>
+            <label className="block text-sm font-medium mb-2">
+              Montos Sugeridos (separados por coma)
+            </label>
+            <input
+              type="text"
+              className="w-full p-2 border rounded-md"
+              placeholder="21,100,1000"
+              value={config.amounts}
+              onChange={(e) => handleConfigChange('amounts', e.target.value)}
+            />
+          </div>
+
+          {/* Etiquetas de Montos */}
+          <div>
+            <label className="block text-sm font-medium mb-2">
+              Etiquetas de Montos (separadas por coma)
+            </label>
+            <input
+              type="text"
+              className="w-full p-2 border rounded-md"
+              placeholder="Café,Propina,Boost"
+              value={config.labels}
+              onChange={(e) => handleConfigChange('labels', e.target.value)}
+            />
+          </div>
+
+          {/* Color del Tema */}
+          <div>
+            <label className="block text-sm font-medium mb-2">
+              Color del Tema
+            </label>
+            <select 
+              className="w-full p-2 border rounded-md"
+              value={config.theme}
+              onChange={(e) => handleConfigChange('theme', e.target.value)}
+            >
+              <option value="orange">Naranja</option>
+              <option value="blue">Azul</option>
+              <option value="green">Verde</option>
+            </select>
+          </div>
+
+          {/* Avatar del Widget */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium">Avatar del Widget</h3>
+            
+            <div className="flex items-center space-x-4">
+              <input
+                type="checkbox"
+                id="useCustomImage"
+                checked={config.useCustomImage}
+                onChange={(e) => handleConfigChange('useCustomImage', e.target.checked)}
+                className="w-4 h-4"
+              />
+              <label htmlFor="useCustomImage">
+                Usar imagen personalizada en lugar de avatar
+              </label>
+            </div>
+
+            <div className="pl-8 space-y-4">
+              {/* URL de Imagen Personalizada */}
+              {config.useCustomImage && (
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    URL de la Imagen
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full p-2 border rounded-md"
+                    placeholder="https://ejemplo.com/tu-imagen.png"
+                    value={config.image || ''}
+                    onChange={(e) => handleConfigChange('image', e.target.value)}
                   />
                 </div>
-              </div>
-            </div>
+              )}
 
-            <div className="mt-8">
-              <h2 className="text-xl font-bold mb-4">Código para tu Web</h2>
-              <div className="relative">
-                <pre className="bg-[#2d2d2d] p-4 rounded-lg overflow-x-auto text-sm">
-                  <code className="whitespace-pre-wrap break-all">{generateWidgetCode()}</code>
-                </pre>
-                <button
-                  onClick={handleCopyCode}
-                  className="absolute top-2 right-2 bg-[#FF8C00] text-white px-3 py-1 rounded-lg hover:bg-[#FF8C00]/90 transition-colors text-sm z-10"
-                >
-                  Copiar
-                </button>
-              </div>
+              {/* O usar Avatar Generado */}
+              {!config.useCustomImage && (
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-sm font-medium">
+                      O usar Avatar Generado
+                    </label>
+                    <button
+                      type="button"
+                      onClick={generateNewAvatar}
+                      className="px-4 py-1 text-sm bg-gray-100 rounded-md hover:bg-gray-200"
+                    >
+                      Generar Nuevo Avatar
+                    </button>
+                  </div>
+                  
+                  <select 
+                    className="w-full p-2 border rounded-md mb-2"
+                    value={config.avatarSet}
+                    onChange={(e) => handleConfigChange('avatarSet', e.target.value as AvatarSet)}
+                  >
+                    <option value="set1">Robots</option>
+                    <option value="set2">Monstruos</option>
+                    <option value="set3">Cabezas</option>
+                    <option value="set4">Gatos</option>
+                    <option value="set5">Humanos</option>
+                  </select>
+                </div>
+              )}
             </div>
           </div>
-        </div>
+
+          {/* Vista Previa */}
+          <div className="mt-12">
+            <h2 className="text-2xl font-bold mb-6">Vista Previa</h2>
+            <div className="flex justify-center">
+              <WebLNBoostButton
+                receiverType={config.receiverType}
+                receiver={config.receiver}
+                amounts={config.amounts.split(',').map(Number)}
+                labels={config.labels.split(',')}
+                theme={config.theme}
+                image={config.useCustomImage ? config.image : undefined}
+                avatarSeed={!config.useCustomImage ? config.avatarSeed : undefined}
+                avatarSet={!config.useCustomImage ? config.avatarSet : undefined}
+              />
+            </div>
+          </div>
+
+          {/* Código para tu Web */}
+          <div className="mt-12">
+            <h2 className="text-2xl font-bold mb-4">Código para tu Web</h2>
+            <div className="relative">
+              <pre className="bg-gray-100 p-4 rounded-lg overflow-x-auto">
+                <code className="text-sm">
+                  {`<script src="https://bitflow.site/widget.js"></script>
+<div id="bitflow-widget" data-config='${JSON.stringify({
+  ...config,
+  amounts: config.amounts.split(',').map(Number),
+  labels: config.labels.split(',')
+})}'></div>`}
+                </code>
+              </pre>
+              <button
+                type="button"
+                onClick={copyCode}
+                className="absolute top-2 right-2 px-3 py-1 text-sm bg-white rounded shadow hover:bg-gray-50"
+              >
+                Copiar
+              </button>
+            </div>
+          </div>
+        </form>
       </div>
-    </div>
+    </main>
   )
-} 
+}

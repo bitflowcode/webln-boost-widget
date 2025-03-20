@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "build:widget": "next build && cp public/widget.js .next/static/widget.js && cp public/widget.css .next/static/widget.css && cp public/widget.bundle.js .next/static/widget.bundle.js"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.1.2",
