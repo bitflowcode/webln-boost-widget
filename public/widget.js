@@ -3,8 +3,20 @@
   const loadScript = (src) => {
     console.log('Cargando script:', src);
     return new Promise((resolve, reject) => {
+      if (src.includes('react.production.min.js') && window.React) {
+        console.log('React ya está cargado, omitiendo carga');
+        resolve();
+        return;
+      }
+      if (src.includes('react-dom.production.min.js') && window.ReactDOM) {
+        console.log('ReactDOM ya está cargado, omitiendo carga');
+        resolve();
+        return;
+      }
+      
       const script = document.createElement('script');
       script.src = src;
+      script.crossOrigin = "anonymous";
       script.onload = () => {
         console.log('Script cargado exitosamente:', src);
         resolve();
@@ -20,12 +32,20 @@
   // Función para cargar estilos
   const loadStyles = () => {
     console.log('Cargando estilos...');
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = 'https://www.bitflow.site/widget.css';
-    link.onload = () => console.log('Estilos cargados exitosamente');
-    link.onerror = (error) => console.error('Error cargando estilos:', error);
-    document.head.appendChild(link);
+    return new Promise((resolve) => {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = 'https://www.bitflow.site/widget.css';
+      link.onload = () => {
+        console.log('Estilos cargados exitosamente');
+        resolve();
+      };
+      link.onerror = (error) => {
+        console.error('Error cargando estilos:', error);
+        resolve(); // Resolvemos incluso con error para no bloquear
+      };
+      document.head.appendChild(link);
+    });
   };
 
   // Función para inicializar el widget
@@ -34,11 +54,11 @@
       console.log('Iniciando carga de dependencias...');
       
       // Cargar React primero
-      await loadScript('https://unpkg.com/react@18/umd/react.production.min.js');
+      await loadScript('https://www.unpkg.com/react@18/umd/react.production.min.js');
       console.log('React cargado, verificando:', !!window.React);
       
       // Luego ReactDOM
-      await loadScript('https://unpkg.com/react-dom@18/umd/react-dom.production.min.js');
+      await loadScript('https://www.unpkg.com/react-dom@18/umd/react-dom.production.min.js');
       console.log('ReactDOM cargado, verificando:', !!window.ReactDOM);
 
       // Cargar el bundle del widget
@@ -46,7 +66,7 @@
       console.log('Bundle del widget cargado, verificando renderBitflowWidget:', !!window.renderBitflowWidget);
       
       // Cargar estilos
-      loadStyles();
+      await loadStyles();
 
       // Buscar todos los elementos widget
       const widgets = document.querySelectorAll('[id^="bitflow-widget"]');
@@ -61,6 +81,9 @@
           if (typeof window.renderBitflowWidget !== 'function') {
             throw new Error('renderBitflowWidget no está disponible');
           }
+          
+          // Limpiar el contenedor antes de renderizar
+          widget.innerHTML = '';
           
           // Renderizar el widget usando la función global definida en widget.bundle.js
           window.renderBitflowWidget(widget, config);

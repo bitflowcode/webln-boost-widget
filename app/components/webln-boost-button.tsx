@@ -559,10 +559,15 @@ export default function WebLNBoostButton({
 
   return (
     <div className="flex flex-col items-center gap-8">
-      <div className="w-[410px] h-[410px]">
+      <div className="w-full h-full">
         <div 
           className="flex flex-col items-center justify-center w-full h-full rounded-3xl p-6 space-y-4 shadow-[0_20px_40px_rgba(0,0,0,0.2)] transition-all duration-300 overflow-hidden"
-          style={{ backgroundColor: currentThemeColor }}
+          style={{ 
+            backgroundColor: currentThemeColor,
+            width: '100%',
+            height: '100%',
+            minHeight: '410px'
+          }}
         >
           {renderStep()}
         </div>
