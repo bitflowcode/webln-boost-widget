@@ -79,8 +79,12 @@
           // Añadir un borde temporal para debugging
           widget.style.border = '2px solid red';
           
-          // Añadir un mensaje de carga
-          widget.innerHTML = '<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background-color: #f0f0f0; color: #333; font-family: Arial;">Cargando Bitflow Widget...</div>';
+          // Crear un contenedor para el widget
+          const container = document.createElement('div');
+          container.style.width = '100%';
+          container.style.height = '100%';
+          widget.innerHTML = '';
+          widget.appendChild(container);
           
           const config = widget.dataset.config ? JSON.parse(widget.dataset.config) : {};
           console.log('Config del widget:', config);
@@ -89,38 +93,24 @@
             throw new Error('renderBitflowWidget no está disponible');
           }
           
-          // Intentar renderizar usando ReactDOM.render
           try {
+            // Crear el componente
             const WidgetComponent = window.renderBitflowWidget(config);
             console.log('Componente creado:', !!WidgetComponent);
             
-            ReactDOM.render(
-              WidgetComponent,
-              widget,
-              () => {
-                console.log('Renderizado completado mediante ReactDOM.render');
-                // Verificar el contenido después del renderizado
-                console.log('Contenido del widget después del renderizado:', widget.innerHTML);
-              }
-            );
+            // Crear root y renderizar
+            const root = ReactDOM.createRoot(container);
+            root.render(WidgetComponent);
+            console.log('Renderizado completado mediante createRoot');
+            
           } catch (renderError) {
             console.error('Error en el renderizado:', renderError);
-            
-            // Intentar renderizar usando la función directamente como fallback
-            try {
-              window.renderBitflowWidget(widget, config);
-              console.log('Renderizado completado mediante función directa');
-              // Verificar el contenido después del renderizado
-              console.log('Contenido del widget después del renderizado directo:', widget.innerHTML);
-            } catch (fallbackError) {
-              console.error('Error en el renderizado fallback:', fallbackError);
-            }
+            container.innerHTML = '<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background-color: #fee; color: #c00; font-family: Arial; padding: 20px; text-align: center;">Error renderizando el widget</div>';
           }
           
           console.log(`Widget ${index + 1} renderizado exitosamente`);
         } catch (parseError) {
           console.error(`Error procesando widget ${index + 1}:`, parseError);
-          // Mostrar el error en el widget
           widget.innerHTML = `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background-color: #fee; color: #c00; font-family: Arial; padding: 20px; text-align: center;">Error cargando el widget: ${parseError.message}</div>`;
         }
       });
