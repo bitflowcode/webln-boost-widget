@@ -94,17 +94,9 @@
           }
           
           try {
-            // Crear el componente
-            const WidgetComponent = window.renderBitflowWidget(config);
-            console.log('Componente creado:', WidgetComponent);
-            console.log('Tipo del componente:', typeof WidgetComponent);
-            console.log('Es válido React element:', React.isValidElement(WidgetComponent));
-            
-            // Crear root y renderizar
-            const root = ReactDOM.createRoot(container);
-            root.render(WidgetComponent);
-            console.log('Renderizado completado mediante createRoot');
-            
+            // Llamar a renderBitflowWidget con el contenedor y la configuración
+            window.renderBitflowWidget(container, config);
+            console.log('Renderizado completado mediante renderBitflowWidget');
           } catch (renderError) {
             console.error('Error en el renderizado:', renderError);
             container.innerHTML = '<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background-color: #fee; color: #c00; font-family: Arial; padding: 20px; text-align: center;">Error renderizando el widget</div>';

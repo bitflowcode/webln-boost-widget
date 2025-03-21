@@ -15,9 +15,7 @@ window.renderBitflowWidget = (container, config) => {
     // (Se generará mediante el proceso de build)
   };
 
-  // Renderizar el componente
-  ReactDOM.render(
-    React.createElement(WebLNBoostButton, config),
-    container
-  );
+  // Renderizar el componente usando createRoot
+  const root = ReactDOM.createRoot(container);
+  root.render(React.createElement(WebLNBoostButton, config));
 }; 
