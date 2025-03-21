@@ -48,6 +48,24 @@
     });
   };
 
+  // Función para verificar que una dependencia esté cargada
+  const waitForDependency = (name, maxAttempts = 50) => {
+    return new Promise((resolve, reject) => {
+      let attempts = 0;
+      const check = () => {
+        attempts++;
+        if (window[name]) {
+          resolve(window[name]);
+        } else if (attempts >= maxAttempts) {
+          reject(new Error(`Timeout esperando por ${name}`));
+        } else {
+          setTimeout(check, 100);
+        }
+      };
+      check();
+    });
+  };
+
   // Función para inicializar el widget
   const initWidget = async () => {
     try {
@@ -55,23 +73,26 @@
       
       // Cargar React primero
       await loadScript('https://www.unpkg.com/react@18/umd/react.development.js');
-      console.log('React cargado, verificando:', !!window.React);
+      await waitForDependency('React');
+      console.log('React cargado y verificado');
       
       // Luego ReactDOM
       await loadScript('https://www.unpkg.com/react-dom@18/umd/react-dom.development.js');
-      console.log('ReactDOM cargado, verificando:', !!window.ReactDOM);
+      await waitForDependency('ReactDOM');
+      console.log('ReactDOM cargado y verificado');
 
       // Cargar QRCode
-      await loadScript('https://www.unpkg.com/qrcode.react@3.1.0/dist/qrcode.react.js');
+      await loadScript('https://unpkg.com/qrcode.react@3.1.0/lib/index.umd.js');
       console.log('QRCode cargado');
 
       // Cargar bech32
-      await loadScript('https://www.unpkg.com/bech32@2.0.0/dist/bech32.js');
+      await loadScript('https://unpkg.com/bech32@2.0.0/dist/index.umd.js');
       console.log('bech32 cargado');
 
       // Cargar el bundle del widget
       await loadScript('https://www.bitflow.site/widget.bundle.js');
-      console.log('Bundle del widget cargado, verificando renderBitflowWidget:', !!window.renderBitflowWidget);
+      await waitForDependency('renderBitflowWidget');
+      console.log('Bundle del widget cargado y verificado');
       
       // Cargar estilos
       await loadStyles();
@@ -121,10 +142,6 @@
           }
           
           console.log('Config del widget:', config);
-          
-          if (typeof window.renderBitflowWidget !== 'function') {
-            throw new Error('renderBitflowWidget no está disponible');
-          }
           
           try {
             window.renderBitflowWidget(container, config);
