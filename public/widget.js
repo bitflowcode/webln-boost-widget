@@ -3,12 +3,12 @@
   const loadScript = (src) => {
     console.log('Cargando script:', src);
     return new Promise((resolve, reject) => {
-      if (src.includes('react.production.min.js') && window.React) {
+      if (src.includes('react.development.js') && window.React) {
         console.log('React ya está cargado, omitiendo carga');
         resolve();
         return;
       }
-      if (src.includes('react-dom.production.min.js') && window.ReactDOM) {
+      if (src.includes('react-dom.development.js') && window.ReactDOM) {
         console.log('ReactDOM ya está cargado, omitiendo carga');
         resolve();
         return;
@@ -61,6 +61,14 @@
       await loadScript('https://www.unpkg.com/react-dom@18/umd/react-dom.development.js');
       console.log('ReactDOM cargado, verificando:', !!window.ReactDOM);
 
+      // Cargar QRCode
+      await loadScript('https://www.unpkg.com/qrcode.react@3.1.0/lib/index.js');
+      console.log('QRCode cargado');
+
+      // Cargar bech32
+      await loadScript('https://www.unpkg.com/bech32@2.0.0/dist/index.js');
+      console.log('bech32 cargado');
+
       // Cargar el bundle del widget
       await loadScript('https://www.bitflow.site/widget.bundle.js');
       console.log('Bundle del widget cargado, verificando renderBitflowWidget:', !!window.renderBitflowWidget);
@@ -94,7 +102,6 @@
           }
           
           try {
-            // Llamar a renderBitflowWidget con el contenedor y la configuración
             window.renderBitflowWidget(container, config);
             console.log('Renderizado completado mediante renderBitflowWidget');
           } catch (renderError) {
