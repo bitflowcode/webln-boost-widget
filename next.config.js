@@ -56,7 +56,16 @@ const nextConfig = {
         headers: [
           {
             key: 'Content-Security-Policy',
-            value: "frame-ancestors 'self' *"
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.google.com https://www.gstatic.com",
+              "style-src 'self' 'unsafe-inline'",
+              "img-src 'self' data: https: http:",
+              "frame-src 'self' https://www.google.com",
+              "worker-src 'self' blob: https://www.google.com",
+              "connect-src 'self' https://www.google.com",
+              "frame-ancestors 'self' *"
+            ].join('; ')
           },
           {
             key: 'X-Frame-Options',
