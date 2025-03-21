@@ -84,17 +84,42 @@
         try {
           console.log(`Procesando widget ${index + 1}/${widgets.length}`);
           
-          // Añadir un borde temporal para debugging
-          widget.style.border = '2px solid red';
-          
           // Crear un contenedor para el widget
           const container = document.createElement('div');
           container.style.width = '100%';
           container.style.height = '100%';
+          container.style.minHeight = '410px';
           widget.innerHTML = '';
           widget.appendChild(container);
           
-          const config = widget.dataset.config ? JSON.parse(widget.dataset.config) : {};
+          // Obtener configuración del widget
+          let config = {};
+          
+          // Intentar obtener config del dataset
+          if (widget.dataset.config) {
+            try {
+              config = JSON.parse(widget.dataset.config);
+            } catch (parseError) {
+              console.error('Error parseando config del dataset:', parseError);
+            }
+          }
+          
+          // Si no hay config en el dataset, intentar obtener de la URL (para iframe)
+          if (Object.keys(config).length === 0 && window.location.search) {
+            const params = new URLSearchParams(window.location.search);
+            config = {
+              receiverType: params.get('receiverType') || 'lightning',
+              receiver: params.get('receiver'),
+              amounts: (params.get('amounts') || '21,100,1000').split(',').map(Number),
+              labels: (params.get('labels') || 'Café,Propina,Boost').split(','),
+              theme: params.get('theme') || 'orange',
+              useCustomImage: params.get('useCustomImage') === 'true',
+              image: params.get('image'),
+              avatarSeed: params.get('avatarSeed'),
+              avatarSet: params.get('avatarSet') || 'set1'
+            };
+          }
+          
           console.log('Config del widget:', config);
           
           if (typeof window.renderBitflowWidget !== 'function') {
@@ -110,9 +135,9 @@
           }
           
           console.log(`Widget ${index + 1} renderizado exitosamente`);
-        } catch (parseError) {
-          console.error(`Error procesando widget ${index + 1}:`, parseError);
-          widget.innerHTML = `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background-color: #fee; color: #c00; font-family: Arial; padding: 20px; text-align: center;">Error cargando el widget: ${parseError.message}</div>`;
+        } catch (error) {
+          console.error(`Error procesando widget ${index + 1}:`, error);
+          widget.innerHTML = `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background-color: #fee; color: #c00; font-family: Arial; padding: 20px; text-align: center;">Error cargando el widget: ${error.message}</div>`;
         }
       });
 

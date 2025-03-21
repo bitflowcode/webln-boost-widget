@@ -8,8 +8,12 @@
 /* Contenedor principal */
 #bitflow-widget {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  width: 410px;
-  height: 410px;
+  width: 100%;
+  min-height: 410px;
+  max-width: 410px;
+  margin: 0 auto;
+  overflow: hidden;
+  border-radius: 16px;
 }
 
 /* Estilos del botón */
@@ -28,19 +32,23 @@
 }
 
 /* Avatar */
-.bitflow-avatar {
+#bitflow-widget .avatar-container {
+  position: relative;
   width: 96px;
   height: 96px;
+  margin: 0 auto;
   border-radius: 50%;
   overflow: hidden;
-  margin-bottom: 1rem;
-  background: #3B81A2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.bitflow-avatar img {
+#bitflow-widget .avatar-container img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
 }
 
 /* Botones */
@@ -86,11 +94,13 @@
 }
 
 /* QR Code */
-.bitflow-qr {
+#bitflow-widget .qr-container {
+  max-width: 280px;
+  margin: 0 auto;
+  padding: 20px;
   background: white;
-  padding: 1rem;
-  border-radius: 0.5rem;
-  margin-bottom: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 /* Texto */
@@ -108,4 +118,34 @@
 .bitflow-flex-col { flex-direction: column; }
 .bitflow-items-center { align-items: center; }
 .bitflow-justify-center { justify-content: center; }
-.bitflow-gap-4 { gap: 1rem; } 
+.bitflow-gap-4 { gap: 1rem; }
+
+#bitflow-widget .invoice-container {
+  max-width: 280px;
+  margin: 16px auto;
+  padding: 12px;
+  background: #2d2d2d;
+  border-radius: 8px;
+  word-break: break-all;
+}
+
+#bitflow-widget .button-container {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+#bitflow-widget .amount-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+  max-width: 280px;
+  margin: 0 auto;
+}
+
+#bitflow-widget .custom-amount {
+  max-width: 280px;
+  margin: 16px auto;
+} 
