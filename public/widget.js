@@ -54,11 +54,11 @@
       console.log('Iniciando carga de dependencias...');
       
       // Cargar React primero
-      await loadScript('https://www.unpkg.com/react@18/umd/react.production.min.js');
+      await loadScript('https://www.unpkg.com/react@18/umd/react.development.js');
       console.log('React cargado, verificando:', !!window.React);
       
       // Luego ReactDOM
-      await loadScript('https://www.unpkg.com/react-dom@18/umd/react-dom.production.min.js');
+      await loadScript('https://www.unpkg.com/react-dom@18/umd/react-dom.development.js');
       console.log('ReactDOM cargado, verificando:', !!window.ReactDOM);
 
       // Cargar el bundle del widget
@@ -96,7 +96,9 @@
           try {
             // Crear el componente
             const WidgetComponent = window.renderBitflowWidget(config);
-            console.log('Componente creado:', !!WidgetComponent);
+            console.log('Componente creado:', WidgetComponent);
+            console.log('Tipo del componente:', typeof WidgetComponent);
+            console.log('Es válido React element:', React.isValidElement(WidgetComponent));
             
             // Crear root y renderizar
             const root = ReactDOM.createRoot(container);
