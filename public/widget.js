@@ -14,7 +14,7 @@
   const loadStyles = () => {
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = 'https://bitflow.site/widget.css';
+    link.href = 'https://www.bitflow.site/widget.css';
     document.head.appendChild(link);
   };
 
@@ -28,7 +28,7 @@
       ]);
 
       // Cargar el bundle del widget
-      await loadScript('https://bitflow.site/widget.bundle.js');
+      await loadScript('https://www.bitflow.site/widget.bundle.js');
       
       // Cargar estilos
       loadStyles();
@@ -37,7 +37,7 @@
       const widgets = document.querySelectorAll('[id^="bitflow-widget"]');
       
       widgets.forEach(widget => {
-        const config = widget.dataset.config ? JSON.parse(widget.dataset.config) : {};
+        const config = widget.dataset.config ? JSON.parse(widget.config) : {};
         
         // Renderizar el widget usando la función global definida en widget.bundle.js
         window.renderBitflowWidget(widget, config);

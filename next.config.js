@@ -58,7 +58,7 @@ const nextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https: http: https://unpkg.com https://bitflow.site",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https: http: https://unpkg.com https://www.bitflow.site https://bitflow.site",
               "style-src 'self' 'unsafe-inline' https: http:",
               "img-src 'self' data: https: http:",
               "frame-src 'self' https://www.google.com",
