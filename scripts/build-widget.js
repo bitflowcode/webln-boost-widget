@@ -13,7 +13,16 @@ async function buildWidget() {
       jsx: 'transform',
       target: 'es2015',
       format: 'iife',
-      minify: true
+      minify: true,
+      define: {
+        'process.env.NODE_ENV': '"production"'
+      },
+      banner: `
+        var process = { env: { NODE_ENV: 'production' } };
+        var require = undefined;
+        var module = undefined;
+        var exports = undefined;
+      `
     });
 
     // Crear el bundle
@@ -22,12 +31,12 @@ async function buildWidget() {
 window.renderBitflowWidget = (container, config) => {
   const { useState, useEffect } = React;
   const requestProvider = window.WebLN?.requestProvider;
-  const QRCodeSVG = window.QRCodeSVG;
+  const QRCodeSVG = window.qrcode?.QRCodeSVG;
   const bech32 = window.bech32;
   
   ${result.code}
 
-  // Renderizar el componente
+  // Renderizar el componente usando createRoot
   const root = ReactDOM.createRoot(container);
   root.render(React.createElement(WebLNBoostButton, config));
 };`;

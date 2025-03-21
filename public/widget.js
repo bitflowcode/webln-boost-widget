@@ -62,11 +62,11 @@
       console.log('ReactDOM cargado, verificando:', !!window.ReactDOM);
 
       // Cargar QRCode
-      await loadScript('https://www.unpkg.com/qrcode.react@3.1.0/lib/index.js');
+      await loadScript('https://www.unpkg.com/qrcode.react@3.1.0/dist/qrcode.react.js');
       console.log('QRCode cargado');
 
       // Cargar bech32
-      await loadScript('https://www.unpkg.com/bech32@2.0.0/dist/index.js');
+      await loadScript('https://www.unpkg.com/bech32@2.0.0/dist/bech32.js');
       console.log('bech32 cargado');
 
       // Cargar el bundle del widget
