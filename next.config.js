@@ -57,19 +57,23 @@ const nextConfig = {
           {
             key: 'Content-Security-Policy',
             value: [
-              "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.google.com https://www.gstatic.com",
-              "style-src 'self' 'unsafe-inline'",
+              "default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval'",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https: http: https://www.google.com https://www.gstatic.com https://unpkg.com https://bitflow.site",
+              "style-src 'self' 'unsafe-inline' https: http:",
               "img-src 'self' data: https: http:",
               "frame-src 'self' https://www.google.com",
               "worker-src 'self' blob: https://www.google.com",
-              "connect-src 'self' https://www.google.com",
-              "frame-ancestors 'self' *"
+              "connect-src 'self' https: http:",
+              "frame-ancestors *"
             ].join('; ')
           },
           {
             key: 'X-Frame-Options',
             value: 'ALLOWALL'
+          },
+          {
+            key: 'Access-Control-Allow-Origin',
+            value: '*'
           }
         ],
       },
