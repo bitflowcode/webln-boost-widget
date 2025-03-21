@@ -415,7 +415,7 @@ export default function WebLNBoostButton({
               <Button
                 onClick={() => setStep("amount")}
                 className="bg-white hover:bg-white/90 font-bold text-lg px-6 py-3 rounded-full shadow-[0_8px_16px_rgba(0,0,0,0.15)] hover:shadow-[0_12px_24px_rgba(0,0,0,0.2)] transition-all duration-200"
-                style={{ color: currentThemeColor }}
+                style={{ color: "blue" }}
               >
                 Donate Sats
               </Button>
@@ -576,4 +576,5 @@ export default function WebLNBoostButton({
     </div>
   )
 }
+
 
