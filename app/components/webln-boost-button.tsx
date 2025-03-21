@@ -414,8 +414,7 @@ export default function WebLNBoostButton({
               <h1 className="text-3xl font-bold text-white mb-6">Bitflow</h1>
               <Button
                 onClick={() => setStep("amount")}
-                className="bg-white hover:bg-white/90 font-bold text-lg px-6 py-3 rounded-full shadow-[0_8px_16px_rgba(0,0,0,0.15)] hover:shadow-[0_12px_24px_rgba(0,0,0,0.2)] transition-all duration-200"
-                style={{ color: "blue" }}
+                className="bg-white text-[#3B81A2] hover:bg-white/90 font-bold text-lg px-6 py-3 rounded-full shadow-[0_8px_16px_rgba(0,0,0,0.15)] hover:shadow-[0_12px_24px_rgba(0,0,0,0.2)] transition-all duration-200"
               >
                 Donate Sats
               </Button>
