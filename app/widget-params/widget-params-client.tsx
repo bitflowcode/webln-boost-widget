@@ -3,110 +3,77 @@
 import { FC, useEffect, useState } from 'react'
 import WebLNBoostButton from '@/app/components/webln-boost-button'
 
-type ReceiverType = 'lightning' | 'lnurl' | 'node'
 type AvatarSet = 'set1' | 'set2' | 'set3' | 'set4' | 'set5'
 
-interface WidgetParamsClientProps {
-  params: { [key: string]: string | string[] | undefined }
-}
-
-interface Labels {
-  amount: string
-  note: string
-  submit: string
-}
-
 interface WidgetConfig {
-  receiverType: ReceiverType
+  receiverType: 'lightning' | 'lnurl' | 'node'
   receiver: string
   amounts: number[]
   labels: string[]
   theme: string
   useCustomImage: boolean
-  rawImage?: string
   image?: string
   avatarSeed?: string
   avatarSet?: AvatarSet
 }
 
-interface WidgetState extends WidgetConfig {
-  formLabels: Labels
-  code: string
-}
-
-const generateWidgetCode = (): string => {
-  return `// Código del widget generado`
+interface WidgetParamsClientProps {
+  params: { [key: string]: string | string[] | undefined }
 }
 
 const WidgetParamsClient: FC<WidgetParamsClientProps> = ({ params }) => {
   const [isLoading, setIsLoading] = useState(true)
-  const [widgetState, setWidgetState] = useState<WidgetState>({
+  const [widgetConfig, setWidgetConfig] = useState<WidgetConfig>({
     receiverType: 'lightning',
     receiver: '',
     amounts: [21, 100, 1000],
     labels: ['Café', 'Propina', 'Boost'],
     theme: 'orange',
-    useCustomImage: false,
-    avatarSet: 'set1',
-    formLabels: {
-      amount: "Cantidad",
-      note: "Nota",
-      submit: "Enviar"
-    },
-    code: ''
+    useCustomImage: false
   })
-
-  // Función para obtener parámetros
-  const getParamAsString = (params: { [key: string]: string | string[] | undefined }, key: string): string | undefined => {
-    const value = params[key]
-    return Array.isArray(value) ? value[0] : value
-  }
 
   useEffect(() => {
     const getParamAsBoolean = (key: string): boolean => {
-      const value = getParamAsString(params, key)
+      const value = params[key]
       return value === 'true'
     }
 
-    // Extraer parámetros
-    const receiverType = (getParamAsString(params, 'receiverType') || 'lightning') as ReceiverType
-    const receiver = getParamAsString(params, 'receiver') || ''
-    const amountsStr = getParamAsString(params, 'amounts') || '21,100,1000'
-    const amounts = amountsStr.split(',').map(Number)
-    const buttonLabels = getParamAsString(params, 'labels')?.split(',') || ['Café', 'Propina', 'Boost']
-    const theme = getParamAsString(params, 'theme') || 'orange'
-    const useCustomImage = getParamAsBoolean('useCustomImage')
-    const rawImage = getParamAsString(params, 'image')
-    const image = rawImage ? decodeURIComponent(rawImage) : undefined
-    const avatarSeed = getParamAsString(params, 'avatarSeed')
-    const avatarSet = (getParamAsString(params, 'avatarSet') || 'set1') as AvatarSet
-
-    // Generar código del widget
-    const widgetConfig: WidgetConfig = {
-      receiverType,
-      receiver,
-      amounts,
-      labels: buttonLabels,
-      theme,
-      useCustomImage,
-      rawImage,
-      image,
-      avatarSeed,
-      avatarSet
+    const getParamAsArray = (key: string, defaultValue: string[]): string[] => {
+      const value = params[key]
+      if (typeof value === 'string') {
+        return value.split(',')
+      }
+      return defaultValue
     }
 
-    const code = generateWidgetCode()
-    
-    setWidgetState({
-      ...widgetConfig,
-      formLabels: {
-        amount: "Cantidad",
-        note: "Nota",
-        submit: "Enviar"
-      },
-      code
-    })
-    
+    const getParamAsNumberArray = (key: string, defaultValue: number[]): number[] => {
+      const value = params[key]
+      if (typeof value === 'string') {
+        return value.split(',').map(Number)
+      }
+      return defaultValue
+    }
+
+    const getParamAsAvatarSet = (value: string | string[] | undefined): AvatarSet | undefined => {
+      if (typeof value === 'string' && ['set1', 'set2', 'set3', 'set4', 'set5'].includes(value)) {
+        return value as AvatarSet
+      }
+      return undefined
+    }
+
+    const config: WidgetConfig = {
+      receiverType: (params.receiverType as 'lightning' | 'lnurl' | 'node') || 'lightning',
+      receiver: (params.receiver as string) || '',
+      amounts: getParamAsNumberArray('amounts', [21, 100, 1000]),
+      labels: getParamAsArray('labels', ['Café', 'Propina', 'Boost']),
+      theme: (params.theme as string) || 'orange',
+      useCustomImage: getParamAsBoolean('useCustomImage'),
+      image: params.image as string | undefined,
+      avatarSeed: params.avatarSeed as string | undefined,
+      avatarSet: getParamAsAvatarSet(params.avatarSet)
+    }
+
+    setWidgetConfig(config)
     setIsLoading(false)
   }, [params])
 
@@ -117,14 +84,14 @@ const WidgetParamsClient: FC<WidgetParamsClientProps> = ({ params }) => {
   return (
     <div className="flex items-center justify-center min-h-screen">
       <WebLNBoostButton
-        receiverType={widgetState.receiverType}
-        receiver={widgetState.receiver}
-        amounts={widgetState.amounts}
-        labels={widgetState.labels}
-        theme={widgetState.theme}
-        avatarSeed={!widgetState.useCustomImage ? widgetState.avatarSeed : undefined}
-        avatarSet={!widgetState.useCustomImage ? widgetState.avatarSet : undefined}
-        image={widgetState.useCustomImage ? widgetState.image : undefined}
+        receiverType={widgetConfig.receiverType}
+        receiver={widgetConfig.receiver}
+        amounts={widgetConfig.amounts}
+        labels={widgetConfig.labels}
+        theme={widgetConfig.theme}
+        image={widgetConfig.useCustomImage ? widgetConfig.image : undefined}
+        avatarSeed={!widgetConfig.useCustomImage ? widgetConfig.avatarSeed : undefined}
+        avatarSet={!widgetConfig.useCustomImage ? widgetConfig.avatarSet : undefined}
       />
     </div>
   )

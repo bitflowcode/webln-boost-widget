@@ -1,10 +1,15 @@
 
+// Asegurarnos de que las dependencias estén disponibles
+if (!window.React || !window.ReactDOM || !window.qrcode || !window.bech32) {
+  throw new Error('Dependencias no cargadas correctamente');
+}
+
 // Función global para renderizar el widget
 window.renderBitflowWidget = (container, config) => {
-  const { useState, useEffect } = React;
-  const requestProvider = window.WebLN?.requestProvider;
-  const QRCodeSVG = window.qrcode?.QRCodeSVG;
-  const bech32 = window.bech32;
+  const { useState, useEffect } = window.React;
+  const { createRoot } = window.ReactDOM;
+  const { QRCodeSVG } = window.qrcode;
+  const { bech32 } = window.bech32;
   
   
         var process = { env: { NODE_ENV: 'production' } };
@@ -17,6 +22,6 @@ window.renderBitflowWidget = (container, config) => {
 
 
   // Renderizar el componente usando createRoot
-  const root = ReactDOM.createRoot(container);
+  const root = createRoot(container);
   root.render(React.createElement(WebLNBoostButton, config));
 };

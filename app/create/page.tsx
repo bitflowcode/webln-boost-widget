@@ -231,23 +231,43 @@ export default function CreatePage() {
             <div className="relative">
               <pre className="bg-gray-100 p-4 rounded-lg overflow-x-auto">
                 <code className="text-sm">
-                  {`<script src="https://bitflow.site/widget.js"></script>
-<div id="bitflow-widget" data-config='${JSON.stringify({
-  ...config,
-  amounts: config.amounts.split(',').map(Number),
-  labels: config.labels.split(',')
-})}'></div>`}
+                  {`<iframe 
+  src="https://bitflow.site/widget-params?${new URLSearchParams({
+    receiverType: config.receiverType,
+    receiver: config.receiver,
+    amounts: config.amounts,
+    labels: config.labels,
+    theme: config.theme,
+    useCustomImage: config.useCustomImage.toString(),
+    ...(config.useCustomImage && config.image ? { image: config.image } : {}),
+    ...(!config.useCustomImage ? { 
+      avatarSeed: config.avatarSeed || '',
+      avatarSet: config.avatarSet || 'set1'
+    } : {})
+  }).toString()}"
+  style="width: 100%; height: 410px; border: none; overflow: hidden;"
+></iframe>`}
                 </code>
               </pre>
               <button
                 type="button"
                 onClick={() => {
-                  const code = `<script src="https://bitflow.site/widget.js"></script>
-<div id="bitflow-widget" data-config='${JSON.stringify({
-  ...config,
-  amounts: config.amounts.split(',').map(Number),
-  labels: config.labels.split(',')
-})}'></div>`;
+                  const code = `<iframe 
+  src="https://bitflow.site/widget-params?${new URLSearchParams({
+    receiverType: config.receiverType,
+    receiver: config.receiver,
+    amounts: config.amounts,
+    labels: config.labels,
+    theme: config.theme,
+    useCustomImage: config.useCustomImage.toString(),
+    ...(config.useCustomImage && config.image ? { image: config.image } : {}),
+    ...(!config.useCustomImage ? { 
+      avatarSeed: config.avatarSeed || '',
+      avatarSet: config.avatarSet || 'set1'
+    } : {})
+  }).toString()}"
+  style="width: 100%; height: 410px; border: none; overflow: hidden;"
+></iframe>`;
                   navigator.clipboard.writeText(code);
                 }}
                 className="absolute top-2 right-2 px-3 py-1 text-sm bg-white rounded shadow hover:bg-gray-50"
