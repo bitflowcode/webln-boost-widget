@@ -24,7 +24,6 @@ const WidgetClient: FC<WidgetClientProps> = ({ id }) => {
   const [config, setConfig] = useState<WidgetConfig | null>(null)
   const [error, setError] = useState<string>('')
   const [debugInfo, setDebugInfo] = useState<string>('')
-  const [widgetParams, setWidgetParams] = useState<WidgetParams | null>(null)
 
   // Función para intentar decodificar manualmente el ID
   const tryDecodingId = (encodedId: string) => {
@@ -78,7 +77,7 @@ const WidgetClient: FC<WidgetClientProps> = ({ id }) => {
       try {
         // Método estándar
         decodedConfig = JSON.parse(atob(id));
-      } catch (decodeError) {
+      } catch {
         // Método alternativo para URL-safe
         const fixedId = id.replace(/-/g, '+').replace(/_/g, '/');
         decodedConfig = JSON.parse(atob(fixedId));
@@ -115,22 +114,6 @@ const WidgetClient: FC<WidgetClientProps> = ({ id }) => {
       setError(`Configuración de widget inválida: ${err instanceof Error ? err.message : 'Error desconocido'}`);
     }
   }, [id]);
-
-  useEffect(() => {
-    const fetchParams = async () => {
-      try {
-        const response = await fetch(`/api/widget/${id}`)
-        if (!response.ok) {
-          throw new Error('Error al obtener los parámetros del widget')
-        }
-        const data = await response.json()
-        setWidgetParams(data)
-      } catch (error) {
-        console.error('Error:', error)
-      }
-    }
-    fetchParams()
-  }, [id])
 
   if (error) {
     return (

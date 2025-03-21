@@ -34,20 +34,9 @@ interface WidgetState extends WidgetConfig {
   code: string
 }
 
-const generateWidgetCode = (config: WidgetConfig): string => {
-  // Implementación de la generación del código del widget
+const generateWidgetCode = (): string => {
   return `// Código del widget generado`
 }
-
-// Función para validar URL seguras
-const isValidHttpsUrl = (urlString: string): boolean => {
-  try {
-    const url = new URL(urlString);
-    return url.protocol === 'https:';
-  } catch {
-    return false;
-  }
-};
 
 const WidgetParamsClient: FC<WidgetParamsClientProps> = ({ params }) => {
   const [isLoading, setIsLoading] = useState(true)
@@ -73,12 +62,12 @@ const WidgetParamsClient: FC<WidgetParamsClientProps> = ({ params }) => {
     return Array.isArray(value) ? value[0] : value
   }
 
-  const getParamAsBoolean = (params: { [key: string]: string | string[] | undefined }, key: string): boolean => {
-    const value = getParamAsString(params, key)
-    return value === 'true'
-  }
-
   useEffect(() => {
+    const getParamAsBoolean = (key: string): boolean => {
+      const value = getParamAsString(params, key)
+      return value === 'true'
+    }
+
     // Extraer parámetros
     const receiverType = (getParamAsString(params, 'receiverType') || 'lightning') as ReceiverType
     const receiver = getParamAsString(params, 'receiver') || ''
@@ -86,7 +75,7 @@ const WidgetParamsClient: FC<WidgetParamsClientProps> = ({ params }) => {
     const amounts = amountsStr.split(',').map(Number)
     const buttonLabels = getParamAsString(params, 'labels')?.split(',') || ['Café', 'Propina', 'Boost']
     const theme = getParamAsString(params, 'theme') || 'orange'
-    const useCustomImage = getParamAsBoolean(params, 'useCustomImage')
+    const useCustomImage = getParamAsBoolean('useCustomImage')
     const rawImage = getParamAsString(params, 'image')
     const image = rawImage ? decodeURIComponent(rawImage) : undefined
     const avatarSeed = getParamAsString(params, 'avatarSeed')
@@ -106,7 +95,7 @@ const WidgetParamsClient: FC<WidgetParamsClientProps> = ({ params }) => {
       avatarSet
     }
 
-    const code = generateWidgetCode(widgetConfig)
+    const code = generateWidgetCode()
     
     setWidgetState({
       ...widgetConfig,
@@ -119,7 +108,7 @@ const WidgetParamsClient: FC<WidgetParamsClientProps> = ({ params }) => {
     })
     
     setIsLoading(false)
-  }, [params, getParamAsBoolean])
+  }, [params])
 
   if (isLoading) {
     return <div>Cargando...</div>

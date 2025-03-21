@@ -1,17 +1,19 @@
+import { Suspense } from 'react'
 import WidgetParamsClient from './widget-params-client'
 
 interface PageProps {
-  params: {
-    id: string
-  }
-  searchParams: { [key: string]: string | string[] | undefined }
+  params: Promise<Record<string, never>>
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
-export default function WidgetParamsPage({ searchParams }: PageProps) {
-  // Pasar los parámetros de URL directamente al componente cliente
+export default async function WidgetParamsPage({
+  searchParams,
+}: PageProps) {
+  const resolvedSearchParams = await searchParams
+
   return (
-    <>
-      <WidgetParamsClient params={searchParams} />
-    </>
+    <Suspense fallback={<div>Cargando...</div>}>
+      <WidgetParamsClient params={resolvedSearchParams} />
+    </Suspense>
   )
 } 

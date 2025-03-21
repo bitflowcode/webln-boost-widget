@@ -51,12 +51,12 @@ interface LNURLInvoiceResponse {
 // Función para decodificar LNURL
 const decodeLNURL = (lnurl: string): string => {
   try {
-    // Decodificar LNURL bech32
-    const { words } = bech32.decode(lnurl, 1500)
-    const url = Buffer.from(bech32.fromWords(words)).toString('utf8')
+    const { words } = bech32.decode(lnurl, 2000)
+    const data = bech32.fromWords(words)
+    const url = new TextDecoder().decode(new Uint8Array(data))
     return url
-  } catch (error) {
-    // URL directa
+  } catch {
+    // Si falla el decode, asumimos que es una URL directa
     return lnurl
   }
 }
@@ -357,9 +357,9 @@ export default function WebLNBoostButton({
         await webln.sendPayment(invoice)
         console.log('Pago completado con éxito')
         resetToInitialState()
-      } catch (error) {
-        console.error("Error detallado en pago WebLN:", error)
-        if (error instanceof Error && error.message?.includes('User rejected')) {
+      } catch (weblnError) {
+        console.error("Error detallado en pago WebLN:", weblnError)
+        if (weblnError instanceof Error && weblnError.message?.includes('User rejected')) {
           setWeblnError("Pago cancelado por el usuario.")
           setStep("initial")
         } else {
@@ -368,9 +368,9 @@ export default function WebLNBoostButton({
           setStep("qr")
         }
       }
-    } catch (error: unknown) {
-      console.error("Error detallado en handleBoost:", error)
-      const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
+    } catch (boostError: unknown) {
+      console.error("Error detallado en handleBoost:", boostError)
+      const errorMessage = boostError instanceof Error ? boostError.message : 'Error desconocido'
       setWeblnError(`Error al generar la factura: ${errorMessage}`)
       setStep("initial")
     } finally {
