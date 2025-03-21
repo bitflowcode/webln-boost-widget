@@ -37,10 +37,15 @@
       const widgets = document.querySelectorAll('[id^="bitflow-widget"]');
       
       widgets.forEach(widget => {
-        const config = widget.dataset.config ? JSON.parse(widget.config) : {};
-        
-        // Renderizar el widget usando la función global definida en widget.bundle.js
-        window.renderBitflowWidget(widget, config);
+        try {
+          const config = widget.dataset.config ? JSON.parse(widget.dataset.config) : {};
+          console.log('Widget config:', config); // Para debugging
+          
+          // Renderizar el widget usando la función global definida en widget.bundle.js
+          window.renderBitflowWidget(widget, config);
+        } catch (parseError) {
+          console.error('Error parsing widget config:', parseError);
+        }
       });
 
     } catch (error) {
