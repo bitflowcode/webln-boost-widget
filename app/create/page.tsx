@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import WebLNBoostButton from '@/app/components/webln-boost-button'
+import Link from 'next/link'
 
 const RECIPIENT_ADDRESS = "bitflowz@getalby.com"
 
@@ -67,13 +68,13 @@ export default function CreatePage() {
       <div className="max-w-3xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-4xl font-bold text-white">Crear Widget</h1>
-          <a 
+          <Link 
             href="/" 
             className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#FF8C00] text-white hover:bg-[#FF8C00]/90 transition-colors"
           >
             <span>←</span>
             <span>Volver al inicio</span>
-          </a>
+          </Link>
         </div>
 
         <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
