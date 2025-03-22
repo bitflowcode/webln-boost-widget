@@ -246,7 +246,7 @@ export default function CreatePage() {
       avatarSet: config.avatarSet || 'set1'
     } : {})
   }).toString()}"
-  style="width: 410px; height: 410px; border: none; background: transparent;"
+  style="width: 420px; height: 420px; border: none; background: transparent;"
   allowtransparency="true"
 ></iframe>`}
                 </code>
@@ -268,7 +268,7 @@ export default function CreatePage() {
       avatarSet: config.avatarSet || 'set1'
     } : {})
   }).toString()}"
-  style="width: 410px; height: 410px; border: none; background: transparent;"
+  style="width: 420px; height: 420px; border: none; background: transparent;"
   allowtransparency="true"
 ></iframe>`;
                   navigator.clipboard.writeText(code);

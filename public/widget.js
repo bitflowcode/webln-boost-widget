@@ -107,9 +107,9 @@
           
           // Crear un contenedor para el widget
           const container = document.createElement('div');
-          container.style.width = '100%';
           container.style.height = '100%';
-          container.style.minHeight = '410px';
+          container.style.minHeight = '420px';
+          container.style.padding = '5px';
           widget.innerHTML = '';
           widget.appendChild(container);
           
