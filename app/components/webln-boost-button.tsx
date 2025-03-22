@@ -572,8 +572,6 @@ export default function WebLNBoostButton({
           className="flex flex-col items-center justify-center w-full h-full rounded-2xl p-6 space-y-4 shadow-[0_20px_40px_rgba(0,0,0,0.2)] transition-all duration-300 overflow-hidden"
           style={{ 
             backgroundColor: currentThemeColor,
-            width: '100%',
-            height: '100%',
             minHeight: '410px',
             minWidth: '410px'
           }}

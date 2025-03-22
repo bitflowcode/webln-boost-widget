@@ -247,6 +247,7 @@ export default function CreatePage() {
     } : {})
   }).toString()}"
   style="width: 410px; height: 410px; border: none; background: transparent;"
+  allowtransparency="true"
 ></iframe>`}
                 </code>
               </pre>
@@ -268,6 +269,7 @@ export default function CreatePage() {
     } : {})
   }).toString()}"
   style="width: 410px; height: 410px; border: none; background: transparent;"
+  allowtransparency="true"
 ></iframe>`;
                   navigator.clipboard.writeText(code);
                 }}
