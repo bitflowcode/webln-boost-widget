@@ -63,18 +63,18 @@ export default function CreatePage() {
   }
 
   return (
-    <main className="min-h-screen bg-white py-12 px-4">
+    <main className="min-h-screen bg-gradient-to-b from-[#1a1a1a] to-[#2a2a2a] py-12 px-4">
       <div className="max-w-3xl mx-auto">
-        <h1 className="text-4xl font-bold mb-8">Crea tu Widget de Donación</h1>
+        <h1 className="text-4xl font-bold mb-8 text-white">Crea tu Widget de Donación</h1>
         
         <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
           {/* Método de Recepción */}
           <div>
-            <label className="block text-sm font-medium mb-2">
+            <label className="block text-sm font-medium mb-2 text-white">
               Método de Recepción
             </label>
             <select 
-              className="w-full p-2 border rounded-md"
+              className="w-full p-2 border rounded-md bg-white/10 text-white border-white/20"
               value={config.receiverType}
               onChange={(e) => handleConfigChange('receiverType', e.target.value as ReceiverType)}
             >
@@ -86,12 +86,12 @@ export default function CreatePage() {
 
           {/* Lightning Address */}
           <div>
-            <label className="block text-sm font-medium mb-2">
+            <label className="block text-sm font-medium mb-2 text-white">
               Lightning Address
             </label>
             <input
               type="text"
-              className="w-full p-2 border rounded-md"
+              className="w-full p-2 border rounded-md bg-white/10 text-white border-white/20 placeholder:text-white/50"
               placeholder="tu@direccion.com"
               value={config.receiver}
               onChange={(e) => handleConfigChange('receiver', e.target.value)}
@@ -100,12 +100,12 @@ export default function CreatePage() {
 
           {/* Montos Sugeridos */}
           <div>
-            <label className="block text-sm font-medium mb-2">
+            <label className="block text-sm font-medium mb-2 text-white">
               Montos Sugeridos (separados por coma)
             </label>
             <input
               type="text"
-              className="w-full p-2 border rounded-md"
+              className="w-full p-2 border rounded-md bg-white/10 text-white border-white/20 placeholder:text-white/50"
               placeholder="21,100,1000"
               value={config.amounts}
               onChange={(e) => handleConfigChange('amounts', e.target.value)}
@@ -114,12 +114,12 @@ export default function CreatePage() {
 
           {/* Etiquetas de Montos */}
           <div>
-            <label className="block text-sm font-medium mb-2">
+            <label className="block text-sm font-medium mb-2 text-white">
               Etiquetas de Montos (separadas por coma)
             </label>
             <input
               type="text"
-              className="w-full p-2 border rounded-md"
+              className="w-full p-2 border rounded-md bg-white/10 text-white border-white/20 placeholder:text-white/50"
               placeholder="Café,Propina,Boost"
               value={config.labels}
               onChange={(e) => handleConfigChange('labels', e.target.value)}
@@ -128,11 +128,11 @@ export default function CreatePage() {
 
           {/* Color del Tema */}
           <div>
-            <label className="block text-sm font-medium mb-2">
+            <label className="block text-sm font-medium mb-2 text-white">
               Color del Tema
             </label>
             <select 
-              className="w-full p-2 border rounded-md"
+              className="w-full p-2 border rounded-md bg-white/10 text-white border-white/20"
               value={config.theme}
               onChange={(e) => handleConfigChange('theme', e.target.value)}
             >
@@ -144,7 +144,7 @@ export default function CreatePage() {
 
           {/* Avatar del Widget */}
           <div className="space-y-4">
-            <h3 className="text-lg font-medium">Avatar del Widget</h3>
+            <h3 className="text-lg font-medium text-white">Avatar del Widget</h3>
             
             <div className="flex items-center space-x-4">
               <input
@@ -154,7 +154,7 @@ export default function CreatePage() {
                 onChange={(e) => handleConfigChange('useCustomImage', e.target.checked)}
                 className="w-4 h-4"
               />
-              <label htmlFor="useCustomImage">
+              <label htmlFor="useCustomImage" className="text-white">
                 Usar imagen personalizada en lugar de avatar
               </label>
             </div>
@@ -163,12 +163,12 @@ export default function CreatePage() {
               {/* URL de Imagen Personalizada */}
               {config.useCustomImage && (
                 <div>
-                  <label className="block text-sm font-medium mb-2">
+                  <label className="block text-sm font-medium mb-2 text-white">
                     URL de la Imagen
                   </label>
                   <input
                     type="text"
-                    className="w-full p-2 border rounded-md"
+                    className="w-full p-2 border rounded-md bg-white/10 text-white border-white/20 placeholder:text-white/50"
                     placeholder="https://ejemplo.com/tu-imagen.png"
                     value={config.image || ''}
                     onChange={(e) => handleConfigChange('image', e.target.value)}
@@ -180,20 +180,20 @@ export default function CreatePage() {
               {!config.useCustomImage && (
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <label className="block text-sm font-medium">
+                    <label className="block text-sm font-medium text-white">
                       O usar Avatar Generado
                     </label>
                     <button
                       type="button"
                       onClick={() => handleConfigChange('avatarSeed', Math.random().toString(36).substring(7))}
-                      className="px-4 py-1 text-sm bg-gray-100 rounded-md hover:bg-gray-200"
+                      className="px-4 py-1 text-sm bg-white/10 text-white rounded-md hover:bg-white/20"
                     >
                       Generar Nuevo Avatar
                     </button>
                   </div>
                   
                   <select 
-                    className="w-full p-2 border rounded-md mb-2"
+                    className="w-full p-2 border rounded-md bg-white/10 text-white border-white/20"
                     value={config.avatarSet}
                     onChange={(e) => handleConfigChange('avatarSet', e.target.value as AvatarSet)}
                   >
@@ -210,7 +210,7 @@ export default function CreatePage() {
 
           {/* Vista Previa */}
           <div className="mt-12">
-            <h2 className="text-2xl font-bold mb-6">Vista Previa</h2>
+            <h2 className="text-2xl font-bold mb-6 text-white">Vista Previa</h2>
             <div className="flex justify-center">
               <WebLNBoostButton
                 receiverType={config.receiverType}
@@ -221,15 +221,16 @@ export default function CreatePage() {
                 image={config.useCustomImage ? config.image : undefined}
                 avatarSeed={!config.useCustomImage ? config.avatarSeed : undefined}
                 avatarSet={!config.useCustomImage ? config.avatarSet : undefined}
+                hideWebLNGuide={true}
               />
             </div>
           </div>
 
           {/* Código para tu Web */}
           <div className="mt-12">
-            <h2 className="text-2xl font-bold mb-4">Código para tu Web</h2>
+            <h2 className="text-2xl font-bold mb-4 text-white">Código para tu Web</h2>
             <div className="relative">
-              <pre className="bg-gray-100 p-4 rounded-lg overflow-x-auto">
+              <pre className="bg-white/10 p-4 rounded-lg overflow-x-auto text-white">
                 <code className="text-sm">
                   {`<iframe 
   src="https://bitflow.site/widget-params?${new URLSearchParams({
@@ -245,7 +246,7 @@ export default function CreatePage() {
       avatarSet: config.avatarSet || 'set1'
     } : {})
   }).toString()}"
-  style="width: 100%; height: 410px; border: none; overflow: hidden;"
+  style="width: 410px; height: 410px; border: none; background: transparent;"
 ></iframe>`}
                 </code>
               </pre>
@@ -266,11 +267,11 @@ export default function CreatePage() {
       avatarSet: config.avatarSet || 'set1'
     } : {})
   }).toString()}"
-  style="width: 100%; height: 410px; border: none; overflow: hidden;"
+  style="width: 410px; height: 410px; border: none; background: transparent;"
 ></iframe>`;
                   navigator.clipboard.writeText(code);
                 }}
-                className="absolute top-2 right-2 px-3 py-1 text-sm bg-white rounded shadow hover:bg-gray-50"
+                className="absolute top-2 right-2 px-3 py-1 text-sm bg-white/10 text-white rounded shadow hover:bg-white/20"
               >
                 Copiar
               </button>

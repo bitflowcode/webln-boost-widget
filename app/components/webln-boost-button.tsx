@@ -27,6 +27,7 @@ interface WebLNBoostButtonProps {
   avatarSeed?: string
   avatarSet?: 'set1' | 'set2' | 'set3' | 'set4' | 'set5'
   image?: string // Para mantener soporte de imagen personalizada
+  hideWebLNGuide?: boolean // Para ocultar la guía de WebLN
 }
 
 type Step = "initial" | "amount" | "note" | "qr" | "processing"
@@ -78,7 +79,8 @@ export default function WebLNBoostButton({
   incrementValue = 10,
   avatarSeed,
   avatarSet = 'set1',
-  image
+  image,
+  hideWebLNGuide = false
 }: WebLNBoostButtonProps) {
   const [step, setStep] = useState<Step>("initial")
   const [amount, setAmount] = useState<number>(0)
@@ -531,23 +533,25 @@ export default function WebLNBoostButton({
 
       case "qr":
         return (
-          <div className="w-full h-full flex flex-col items-center justify-center gap-4 py-4">
-            <div className="bg-white p-4 rounded-lg">
-              <QRCodeSVG value={invoice} size={220} />
-            </div>
-            <div className="w-full bg-[#2d2d2d] p-3 rounded-lg">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-xs text-white/70">Lightning Invoice:</p>
-                <button
-                  onClick={() => navigator.clipboard.writeText(invoice)}
-                  className="text-xs bg-white/10 hover:bg-white/20 text-white px-2 py-1 rounded transition-colors"
-                >
-                  Copiar
-                </button>
+          <div className="w-full h-full flex flex-col items-center justify-between py-6">
+            <div className="flex flex-col items-center gap-4">
+              <div className="bg-white p-4 rounded-lg">
+                <QRCodeSVG value={invoice} size={200} />
               </div>
-              <p className="text-[10px] text-white/90 font-mono break-all whitespace-pre-wrap">
-                {invoice}
-              </p>
+              <div className="w-full bg-[#2d2d2d] p-3 rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-xs text-white/70">Lightning Invoice:</p>
+                  <button
+                    onClick={() => navigator.clipboard.writeText(invoice)}
+                    className="text-xs bg-white/10 hover:bg-white/20 text-white px-2 py-1 rounded transition-colors"
+                  >
+                    Copiar
+                  </button>
+                </div>
+                <p className="text-[10px] text-white/90 font-mono break-all whitespace-pre-wrap">
+                  {invoice}
+                </p>
+              </div>
             </div>
             <Button
               onClick={resetToInitialState}
@@ -576,7 +580,7 @@ export default function WebLNBoostButton({
         >
           {renderStep()}
         </div>
-        {weblnError && (
+        {weblnError && !hideWebLNGuide && (
           <div className="absolute -bottom-2 left-0 right-0 transform translate-y-full pt-4 z-10">
             <div className="bg-white rounded-lg shadow-lg p-4">
               <WebLNGuide />
