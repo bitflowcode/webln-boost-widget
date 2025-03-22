@@ -391,33 +391,37 @@ export default function WebLNBoostButton({
       case "initial":
         return (
           <div className="relative w-full h-full">
-            <div className="absolute inset-0 rounded-lg flex flex-col items-center justify-center" style={{ backgroundColor: currentThemeColor }}>
-              <div className="relative w-24 h-24 mb-4">
-                <div className="absolute inset-0 bg-[#3B81A2] rounded-full">
-                  {image ? (
-                    <CustomAvatar
-                      imageUrl={image}
-                      size={96}
-                      className="w-full h-full"
-                    />
-                  ) : (
-                    <RoboAvatar
-                      seed={avatarSeed || 'default'}
-                      set={avatarSet}
-                      size={96}
-                      className="w-full h-full"
-                    />
-                  )}
+            <div className="absolute inset-0 rounded-lg flex flex-col items-center justify-center gap-4" style={{ backgroundColor: currentThemeColor }}>
+              <div className="flex flex-col items-center justify-center gap-4">
+                <div className="relative w-24 h-24">
+                  <div className="absolute inset-0 bg-[#3B81A2] rounded-full overflow-hidden">
+                    {image ? (
+                      <CustomAvatar
+                        imageUrl={image}
+                        size={96}
+                        className="w-full h-full"
+                      />
+                    ) : (
+                      <RoboAvatar
+                        seed={avatarSeed || 'default'}
+                        set={avatarSet}
+                        size={96}
+                        className="w-full h-full"
+                      />
+                    )}
+                  </div>
+                </div>
+                
+                <div className="flex flex-col items-center gap-4">
+                  <h1 className="text-3xl font-bold text-white">Bitflow</h1>
+                  <Button
+                    onClick={() => setStep("amount")}
+                    className="bg-white text-[#3B81A2] hover:bg-white/90 font-bold text-lg px-6 py-3 rounded-full shadow-[0_8px_16px_rgba(0,0,0,0.15)] hover:shadow-[0_12px_24px_rgba(0,0,0,0.2)] transition-all duration-200"
+                  >
+                    Donate Sats
+                  </Button>
                 </div>
               </div>
-              
-              <h1 className="text-3xl font-bold text-white mb-6">Bitflow</h1>
-              <Button
-                onClick={() => setStep("amount")}
-                className="bg-white text-[#3B81A2] hover:bg-white/90 font-bold text-lg px-6 py-3 rounded-full shadow-[0_8px_16px_rgba(0,0,0,0.15)] hover:shadow-[0_12px_24px_rgba(0,0,0,0.2)] transition-all duration-200"
-              >
-                Donate Sats
-              </Button>
             </div>
           </div>
         )
@@ -527,11 +531,11 @@ export default function WebLNBoostButton({
 
       case "qr":
         return (
-          <div className="w-full flex flex-col items-center">
+          <div className="w-full max-w-[320px] flex flex-col items-center">
             <div className="bg-white p-4 rounded-lg mb-4">
               <QRCodeSVG value={invoice} size={200} />
             </div>
-            <div className="w-full bg-[#2d2d2d] p-3 rounded-lg mb-4">
+            <div className="w-full bg-[#2d2d2d] p-3 rounded-lg mb-4 max-w-[320px]">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-xs text-white/70">Lightning Invoice:</p>
                 <button
@@ -541,7 +545,7 @@ export default function WebLNBoostButton({
                   Copiar
                 </button>
               </div>
-              <p className="text-[10px] text-white/90 font-mono truncate">
+              <p className="text-[10px] text-white/90 font-mono break-all whitespace-pre-wrap">
                 {invoice}
               </p>
             </div>
@@ -559,21 +563,22 @@ export default function WebLNBoostButton({
 
   return (
     <div className="flex flex-col items-center gap-8">
-      <div className="w-full h-full">
+      <div className="w-full h-full" style={{ maxWidth: '320px' }}>
         <div 
           className="flex flex-col items-center justify-center w-full h-full rounded-3xl p-6 space-y-4 shadow-[0_20px_40px_rgba(0,0,0,0.2)] transition-all duration-300 overflow-hidden"
           style={{ 
             backgroundColor: currentThemeColor,
             width: '100%',
             height: '100%',
-            minHeight: '410px'
+            minHeight: '410px',
+            maxWidth: '320px'
           }}
         >
           {renderStep()}
         </div>
       </div>
       {weblnError && (
-        <div className="w-[400px]">
+        <div className="w-full max-w-[320px]">
           <WebLNGuide />
         </div>
       )}

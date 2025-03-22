@@ -82,17 +82,19 @@ const WidgetParamsClient: FC<WidgetParamsClientProps> = ({ params }) => {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <WebLNBoostButton
-        receiverType={widgetConfig.receiverType}
-        receiver={widgetConfig.receiver}
-        amounts={widgetConfig.amounts}
-        labels={widgetConfig.labels}
-        theme={widgetConfig.theme}
-        image={widgetConfig.useCustomImage ? widgetConfig.image : undefined}
-        avatarSeed={!widgetConfig.useCustomImage ? widgetConfig.avatarSeed : undefined}
-        avatarSet={!widgetConfig.useCustomImage ? widgetConfig.avatarSet : undefined}
-      />
+    <div className="flex items-center justify-center min-h-screen p-4">
+      <div className="w-full max-w-[320px]">
+        <WebLNBoostButton
+          receiverType={widgetConfig.receiverType}
+          receiver={widgetConfig.receiver}
+          amounts={widgetConfig.amounts}
+          labels={widgetConfig.labels}
+          theme={widgetConfig.theme}
+          image={widgetConfig.useCustomImage ? widgetConfig.image : undefined}
+          avatarSeed={!widgetConfig.useCustomImage ? widgetConfig.avatarSeed : undefined}
+          avatarSet={!widgetConfig.useCustomImage ? widgetConfig.avatarSet : undefined}
+        />
+      </div>
     </div>
   )
 }
