@@ -430,7 +430,7 @@ export default function WebLNBoostButton({
         return (
           <>
             <h1 className="text-3xl font-bold text-white mb-6">How many Sats?</h1>
-            <div className="flex gap-3 mb-4 w-full max-w-[280px] justify-center">
+            <div className="flex gap-3 mb-4 w-full max-w-[360px] justify-center">
               {amounts.map((preset, index) => (
                 <Button
                   key={preset}
@@ -462,7 +462,7 @@ export default function WebLNBoostButton({
                 <span className="text-lg mt-1 font-bold">⚡</span>
               </div>
             </Button>
-            <div className="w-full max-w-[280px] flex justify-center">
+            <div className="w-full max-w-[360px] flex justify-center">
               <input
                 type="number"
                 inputMode="numeric"
@@ -503,7 +503,7 @@ export default function WebLNBoostButton({
               value={note}
               onChange={handleNoteChange}
               placeholder="Enter your note"
-              className="w-full max-w-[320px] p-4 rounded-3xl text-xl mb-6 h-40 resize-none placeholder:text-gray-400 focus:outline-none focus:ring-2"
+              className="w-full max-w-[360px] p-4 rounded-3xl text-xl mb-6 h-40 resize-none placeholder:text-gray-400 focus:outline-none focus:ring-2"
               style={{ 
                 color: currentThemeColor,
                 '--tw-ring-color': currentThemeColor
@@ -531,11 +531,11 @@ export default function WebLNBoostButton({
 
       case "qr":
         return (
-          <div className="w-full max-w-[320px] flex flex-col items-center">
+          <div className="w-full max-w-[410px] flex flex-col items-center">
             <div className="bg-white p-4 rounded-lg mb-4">
-              <QRCodeSVG value={invoice} size={200} />
+              <QRCodeSVG value={invoice} size={250} />
             </div>
-            <div className="w-full bg-[#2d2d2d] p-3 rounded-lg mb-4 max-w-[320px]">
+            <div className="w-full bg-[#2d2d2d] p-3 rounded-lg mb-4 max-w-[410px]">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-xs text-white/70">Lightning Invoice:</p>
                 <button
@@ -563,22 +563,22 @@ export default function WebLNBoostButton({
 
   return (
     <div className="flex flex-col items-center gap-8">
-      <div className="w-full h-full" style={{ maxWidth: '320px' }}>
+      <div className="w-[410px] h-[410px]">
         <div 
-          className="flex flex-col items-center justify-center w-full h-full rounded-3xl p-6 space-y-4 shadow-[0_20px_40px_rgba(0,0,0,0.2)] transition-all duration-300 overflow-hidden"
+          className="flex flex-col items-center justify-center w-full h-full rounded-2xl p-6 space-y-4 shadow-[0_20px_40px_rgba(0,0,0,0.2)] transition-all duration-300 overflow-hidden"
           style={{ 
             backgroundColor: currentThemeColor,
             width: '100%',
             height: '100%',
             minHeight: '410px',
-            maxWidth: '320px'
+            minWidth: '410px'
           }}
         >
           {renderStep()}
         </div>
       </div>
       {weblnError && (
-        <div className="w-full max-w-[320px]">
+        <div className="w-[410px]">
           <WebLNGuide />
         </div>
       )}
