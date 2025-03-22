@@ -83,7 +83,7 @@ const WidgetParamsClient: FC<WidgetParamsClientProps> = ({ params }) => {
 
   return (
     <div className="flex items-center justify-center min-h-screen p-4">
-      <div className="w-[410px] h-[410px]">
+      <div className="relative">
         <WebLNBoostButton
           receiverType={widgetConfig.receiverType}
           receiver={widgetConfig.receiver}

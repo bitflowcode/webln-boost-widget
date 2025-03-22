@@ -531,11 +531,11 @@ export default function WebLNBoostButton({
 
       case "qr":
         return (
-          <div className="w-full max-w-[410px] flex flex-col items-center">
-            <div className="bg-white p-4 rounded-lg mb-4">
-              <QRCodeSVG value={invoice} size={250} />
+          <div className="w-full h-full flex flex-col items-center justify-center gap-4 py-4">
+            <div className="bg-white p-4 rounded-lg">
+              <QRCodeSVG value={invoice} size={220} />
             </div>
-            <div className="w-full bg-[#2d2d2d] p-3 rounded-lg mb-4 max-w-[410px]">
+            <div className="w-full bg-[#2d2d2d] p-3 rounded-lg">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-xs text-white/70">Lightning Invoice:</p>
                 <button
@@ -562,8 +562,8 @@ export default function WebLNBoostButton({
   }
 
   return (
-    <div className="flex flex-col items-center gap-8">
-      <div className="w-[410px] h-[410px]">
+    <div className="flex flex-col items-center">
+      <div className="w-[410px] h-[410px] relative">
         <div 
           className="flex flex-col items-center justify-center w-full h-full rounded-2xl p-6 space-y-4 shadow-[0_20px_40px_rgba(0,0,0,0.2)] transition-all duration-300 overflow-hidden"
           style={{ 
@@ -576,12 +576,14 @@ export default function WebLNBoostButton({
         >
           {renderStep()}
         </div>
+        {weblnError && (
+          <div className="absolute -bottom-2 left-0 right-0 transform translate-y-full pt-4 z-10">
+            <div className="bg-white rounded-lg shadow-lg p-4">
+              <WebLNGuide />
+            </div>
+          </div>
+        )}
       </div>
-      {weblnError && (
-        <div className="w-[410px]">
-          <WebLNGuide />
-        </div>
-      )}
     </div>
   )
 }
