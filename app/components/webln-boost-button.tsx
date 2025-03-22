@@ -533,12 +533,12 @@ export default function WebLNBoostButton({
 
       case "qr":
         return (
-          <div className="w-full h-full flex flex-col items-center justify-between py-6">
-            <div className="flex flex-col items-center gap-4">
-              <div className="bg-white p-4 rounded-lg">
+          <div className="w-full h-full flex flex-col items-center justify-between gap-4">
+            <div className="flex flex-col items-center gap-4 overflow-y-auto max-h-[90%] w-full">
+              <div className="bg-white p-4 rounded-lg flex-shrink-0">
                 <QRCodeSVG value={invoice} size={200} />
               </div>
-              <div className="w-full bg-[#2d2d2d] p-3 rounded-lg">
+              <div className="w-full bg-[#2d2d2d] p-3 rounded-lg flex-shrink-0">
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-xs text-white/70">Lightning Invoice:</p>
                   <button
@@ -555,7 +555,7 @@ export default function WebLNBoostButton({
             </div>
             <Button
               onClick={resetToInitialState}
-              className="bg-white hover:bg-white/90 font-bold text-lg px-6 py-2 rounded-full shadow-[0_8px_16px_rgba(0,0,0,0.15)] hover:shadow-[0_12px_24px_rgba(0,0,0,0.2)] transition-all duration-200"
+              className="bg-white hover:bg-white/90 font-bold text-lg px-6 py-2 rounded-full shadow-[0_8px_16px_rgba(0,0,0,0.15)] hover:shadow-[0_12px_24px_rgba(0,0,0,0.2)] transition-all duration-200 flex-shrink-0"
               style={{ color: currentThemeColor }}
             >
               Done?
