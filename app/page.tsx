@@ -18,7 +18,7 @@ export default function Home() {
       {/* Demo Section */}
       <section className="container mx-auto px-4 py-16">
         <h2 className="text-3xl font-bold text-center mb-12">Pruébalo</h2>
-        <div className="flex justify-center">
+        <div className="flex flex-col items-center gap-8">
           <WebLNBoostButton
             receiverType="lightning"
             receiver="bitflowz@getalby.com"
@@ -26,7 +26,30 @@ export default function Home() {
             labels={['Café', 'Propina', 'Boost']}
             image="/assets/images/bitflow-avatar.png"
             theme="orange"
+            hideWebLNGuide={true}
           />
+          
+          <div className="relative group cursor-help">
+            <button className="flex items-center gap-2 text-white/80 hover:text-white transition-colors px-4 py-2 rounded-full bg-white/10 hover:bg-white/20">
+              <span>¿Pagos con un click?</span>
+              <span className="inline-flex items-center justify-center w-5 h-5 rounded-full border border-current">ℹ</span>
+            </button>
+            
+            <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-[320px] bg-white rounded-xl shadow-xl p-6 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+              <h3 className="text-[#3B81A2] font-bold text-lg mb-3">Extensión WebLN</h3>
+              <p className="text-gray-600 mb-4">
+                Con una extensión WebLN como Alby en tu navegador, podrás hacer pagos instantáneos sin necesidad de escanear códigos QR o copiar facturas.
+              </p>
+              <a 
+                href="https://getalby.com" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-block bg-[#FF8C00] text-white px-4 py-2 rounded-full font-medium hover:bg-[#FF8C00]/90 transition-colors"
+              >
+                Instalar Alby
+              </a>
+            </div>
+          </div>
         </div>
       </section>
 

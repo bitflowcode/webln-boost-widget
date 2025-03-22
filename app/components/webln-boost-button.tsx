@@ -131,21 +131,21 @@ export default function WebLNBoostButton({
     const checkMobile = () => {
       const mobile = /iPhone|iPad|Android/i.test(navigator.userAgent)
       setIsMobile(mobile)
-      if (mobile) {
-        setWeblnError("") // No mostrar error de WebLN en móvil
+      if (mobile || hideWebLNGuide) {
+        setWeblnError("") // No mostrar error de WebLN en móvil o si hideWebLNGuide es true
       }
     }
     
     checkMobile()
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)
-  }, [])
+  }, [hideWebLNGuide])
 
   useEffect(() => {
     const initWebLN = async () => {
       try {
-        // Solo intentar WebLN en desktop
-        if (!isMobile) {
+        // Solo intentar WebLN en desktop y si no está oculta la guía
+        if (!isMobile && !hideWebLNGuide) {
           const provider = await requestProvider()
           await provider.enable() // Intentar habilitar inmediatamente
           setWebln(provider)
@@ -154,13 +154,13 @@ export default function WebLNBoostButton({
       } catch (initError) {
         console.error("WebLN no está disponible:", initError)
         setWebln(null)
-        if (!isMobile) {
+        if (!isMobile && !hideWebLNGuide) {
           setWeblnError("No se detectó una billetera compatible con WebLN")
         }
       }
     }
     initWebLN()
-  }, [isMobile])
+  }, [isMobile, hideWebLNGuide])
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout | null = null;
@@ -392,39 +392,22 @@ export default function WebLNBoostButton({
     switch (step) {
       case "initial":
         return (
-          <div className="relative w-full h-full">
-            <div className="absolute inset-0 rounded-lg flex flex-col items-center justify-center gap-4" style={{ backgroundColor: currentThemeColor }}>
-              <div className="flex flex-col items-center justify-center gap-4">
-                <div className="relative w-24 h-24">
-                  <div className="absolute inset-0 bg-[#3B81A2] rounded-full overflow-hidden">
-                    {image ? (
-                      <CustomAvatar
-                        imageUrl={image}
-                        size={96}
-                        className="w-full h-full"
-                      />
-                    ) : (
-                      <RoboAvatar
-                        seed={avatarSeed || 'default'}
-                        set={avatarSet}
-                        size={96}
-                        className="w-full h-full"
-                      />
-                    )}
-                  </div>
-                </div>
-                
-                <div className="flex flex-col items-center gap-4">
-                  <h1 className="text-3xl font-bold text-white">Bitflow</h1>
-                  <Button
-                    onClick={() => setStep("amount")}
-                    className="bg-white text-[#3B81A2] hover:bg-white/90 font-bold text-lg px-6 py-3 rounded-full shadow-[0_8px_16px_rgba(0,0,0,0.15)] hover:shadow-[0_12px_24px_rgba(0,0,0,0.2)] transition-all duration-200"
-                  >
-                    Donate Sats
-                  </Button>
-                </div>
-              </div>
+          <div className="flex flex-col items-center gap-6">
+            <div className="w-32 h-32 relative">
+              {image ? (
+                <CustomAvatar imageUrl={image} size={128} />
+              ) : (
+                <RoboAvatar seed={avatarSeed || 'default'} set={avatarSet} size={128} />
+              )}
             </div>
+            <h2 className="text-4xl font-bold text-white">Bitflow</h2>
+            <Button
+              onClick={() => setStep("amount")}
+              className="bg-white hover:bg-white/90 font-bold text-lg px-8 py-3 rounded-full shadow-[0_8px_16px_rgba(0,0,0,0.15)] hover:shadow-[0_12px_24px_rgba(0,0,0,0.2)] transition-all duration-200"
+              style={{ color: currentThemeColor }}
+            >
+              Donate Sats
+            </Button>
           </div>
         )
 
@@ -567,9 +550,9 @@ export default function WebLNBoostButton({
 
   return (
     <div className="flex flex-col items-center">
-      <div className="w-[420px] h-[420px] relative">
+      <div className="w-[460px] h-[460px] relative flex items-center justify-center">
         <div 
-          className="flex flex-col items-center justify-center w-full h-full rounded-2xl p-6 space-y-4 shadow-[0_20px_40px_rgba(0,0,0,0.2)] transition-all duration-300 overflow-hidden"
+          className="w-[420px] h-[420px] rounded-2xl p-6 space-y-4 shadow-[0_20px_40px_rgba(0,0,0,0.2)] transition-all duration-300 overflow-hidden flex flex-col items-center justify-center"
           style={{ 
             backgroundColor: currentThemeColor,
             minHeight: '420px',

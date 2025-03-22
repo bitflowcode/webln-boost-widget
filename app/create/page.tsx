@@ -66,14 +66,14 @@ export default function CreatePage() {
     <main className="min-h-screen bg-gradient-to-b from-[#1a1a1a] to-[#2a2a2a] py-12 px-4">
       <div className="max-w-3xl mx-auto">
         <h1 className="text-4xl font-bold mb-8 text-white">Crea tu Widget de Donación</h1>
-        
+
         <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
           {/* Método de Recepción */}
           <div>
             <label className="block text-sm font-medium mb-2 text-white">
               Método de Recepción
             </label>
-            <select 
+            <select
               className="w-full p-2 border rounded-md bg-white/10 text-white border-white/20"
               value={config.receiverType}
               onChange={(e) => handleConfigChange('receiverType', e.target.value as ReceiverType)}
@@ -131,7 +131,7 @@ export default function CreatePage() {
             <label className="block text-sm font-medium mb-2 text-white">
               Color del Tema
             </label>
-            <select 
+            <select
               className="w-full p-2 border rounded-md bg-white/10 text-white border-white/20"
               value={config.theme}
               onChange={(e) => handleConfigChange('theme', e.target.value)}
@@ -145,7 +145,7 @@ export default function CreatePage() {
           {/* Avatar del Widget */}
           <div className="space-y-4">
             <h3 className="text-lg font-medium text-white">Avatar del Widget</h3>
-            
+
             <div className="flex items-center space-x-4">
               <input
                 type="checkbox"
@@ -191,8 +191,8 @@ export default function CreatePage() {
                       Generar Nuevo Avatar
                     </button>
                   </div>
-                  
-                  <select 
+
+                  <select
                     className="w-full p-2 border rounded-md bg-white/10 text-white border-white/20"
                     value={config.avatarSet}
                     onChange={(e) => handleConfigChange('avatarSet', e.target.value as AvatarSet)}
@@ -246,7 +246,7 @@ export default function CreatePage() {
       avatarSet: config.avatarSet || 'set1'
     } : {})
   }).toString()}"
-  style="width: 445x; height: 445px; border: none; background: transparent;"
+  style="width: 460px; height: 460px; border: none; background: transparent;"
   allowtransparency="true"
 ></iframe>`}
                 </code>
@@ -268,7 +268,7 @@ export default function CreatePage() {
       avatarSet: config.avatarSet || 'set1'
     } : {})
   }).toString()}"
-  style="width: 445px; height: 445px; border: none; background: transparent;"
+  style="width: 460px; height: 460px; border: none; background: transparent;"
   allowtransparency="true"
 ></iframe>`;
                   navigator.clipboard.writeText(code);

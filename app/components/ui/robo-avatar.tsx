@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
 
 interface RoboAvatarProps {
@@ -26,27 +26,35 @@ export default function RoboAvatar({ seed, set, size = 128, className = '' }: Ro
 
   const imageUrl = generateRobohashUrl(seed, set)
 
-  if (!isClient || imageError) {
-    return (
-      <div className={`relative w-${size} h-${size} bg-[#3B81A2] rounded-full overflow-hidden flex items-center justify-center ${className}`}>
-        <div className="w-full h-full flex items-center justify-center bg-[#3B81A2] text-white font-bold text-xl">
+  return (
+    <div 
+      className={`relative rounded-full overflow-hidden flex items-center justify-center ${className}`}
+      style={{ 
+        width: size,
+        height: size,
+        backgroundColor: '#3B81A2',
+        position: 'relative'
+      }}
+    >
+      <div 
+        className="absolute inset-0"
+        style={{ backgroundColor: '#3B81A2' }}
+      />
+      {(!isClient || imageError) ? (
+        <div className="relative z-10 w-full h-full flex items-center justify-center text-white font-bold text-xl">
           BF
         </div>
-      </div>
-    )
-  }
-
-  return (
-    <div className={`relative aspect-square ${className}`} style={{ width: size, height: size }}>
-      <Image
-        src={imageUrl}
-        alt={`Avatar generado ${seed || 'default'}`}
-        fill
-        className="rounded-full object-cover"
-        unoptimized
-        priority
-        onError={() => setImageError(true)}
-      />
+      ) : (
+        <Image
+          src={imageUrl}
+          alt={`Avatar generado ${seed || 'default'}`}
+          fill
+          className="relative z-10 object-cover"
+          unoptimized
+          priority
+          onError={() => setImageError(true)}
+        />
+      )}
     </div>
   )
 }
