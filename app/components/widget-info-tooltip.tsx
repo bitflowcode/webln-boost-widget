@@ -7,13 +7,15 @@ export default function WidgetInfoTooltip() {
 
   return (
     <div className="relative flex justify-center">
-      <button 
-        className="flex items-center gap-2 text-white/80 hover:text-white transition-colors px-4 py-2 rounded-full bg-[#2d2d2d] hover:bg-[#3d3d3d]"
-        onClick={() => setIsVisible(!isVisible)}
-      >
-        <span>¿Pagos con un click?</span>
-        <span className="inline-flex items-center justify-center w-5 h-5 rounded-full border border-[#FF8C00] text-[#FF8C00]">ℹ</span>
-      </button>
+      <div className="bg-[#1a1a1a] rounded-2xl shadow-lg">
+        <button 
+          className="flex items-center gap-2 text-white/80 hover:text-white transition-colors px-6 py-3 rounded-2xl"
+          onClick={() => setIsVisible(!isVisible)}
+        >
+          <span>¿Pagos con un click?</span>
+          <span className="inline-flex items-center justify-center w-5 h-5 rounded-full border border-[#FF8C00] text-[#FF8C00]">ℹ</span>
+        </button>
+      </div>
       
       {isVisible && (
         <>
