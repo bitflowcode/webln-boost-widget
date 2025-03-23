@@ -562,8 +562,8 @@ export default function WebLNBoostButton({
           {renderStep()}
         </div>
         {weblnError && !hideWebLNGuide && (
-          <div className="absolute -bottom-2 left-0 right-0 transform translate-y-full pt-4 z-10 flex justify-center">
-            <div className="bg-[#2d2d2d] rounded-lg shadow-lg p-4">
+          <div className="absolute -bottom-2 left-0 right-0 transform translate-y-full pt-2 z-10 flex justify-center">
+            <div className="p-0">
               <WidgetInfoTooltip />
             </div>
           </div>
