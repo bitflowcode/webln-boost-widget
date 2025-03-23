@@ -6,9 +6,9 @@ export default function WidgetInfoTooltip() {
   const [isVisible, setIsVisible] = useState(false)
 
   return (
-    <div className="relative">
+    <div className="relative flex justify-center">
       <button 
-        className="flex items-center gap-2 text-white/80 hover:text-white transition-colors px-4 py-2 rounded-full bg-white/10 hover:bg-white/20"
+        className="flex items-center gap-2 text-white/80 hover:text-white transition-colors px-4 py-2 rounded-full bg-[#2d2d2d] hover:bg-[#3d3d3d]"
         onClick={() => setIsVisible(!isVisible)}
       >
         <span>¿Pagos con un click?</span>
