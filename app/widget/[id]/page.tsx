@@ -1,4 +1,5 @@
 import WidgetClient from './widget-client'
+import WidgetStyles from './widget-styles'
 
 interface PageProps {
   params: Promise<{
@@ -12,14 +13,7 @@ async function Page({ params }: PageProps) {
   
   return (
     <div className="bg-transparent">
-      <style jsx global>{`
-        body {
-          background: transparent !important;
-          min-height: unset !important;
-          margin: 0 !important;
-          padding: 0 !important;
-        }
-      `}</style>
+      <WidgetStyles />
       <WidgetClient id={resolvedParams.id} />
     </div>
   )
