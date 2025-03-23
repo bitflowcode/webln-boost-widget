@@ -157,7 +157,7 @@ const WidgetClient: FC<WidgetClientProps> = ({ id }) => {
   console.log('Configuración final antes de renderizar:', JSON.stringify(config, null, 2));
 
   return (
-    <div className="flex items-center justify-center min-h-screen">
+    <div className="flex items-center justify-center min-h-screen bg-transparent">
       <WebLNBoostButton
         receiverType={config.receiverType}
         receiver={config.receiver}
