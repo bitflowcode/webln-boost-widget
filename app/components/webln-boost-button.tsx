@@ -552,7 +552,7 @@ export default function WebLNBoostButton({
     <div className="flex flex-col items-center bg-transparent">
       <div className="w-[460px] h-[420px] relative flex items-center justify-center bg-transparent">
         <div 
-          className="w-[420px] h-[420px] rounded-2xl p-6 space-y-4 shadow-[0_20px_40px_rgba(0,0,0,0.2)] transition-all duration-300 overflow-hidden flex flex-col items-center justify-center"
+          className="w-[420px] h-[420px] rounded-2xl p-6 space-y-4 transition-all duration-300 overflow-hidden flex flex-col items-center justify-center"
           style={{ 
             backgroundColor: currentThemeColor,
             minHeight: '420px',

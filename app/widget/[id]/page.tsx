@@ -10,20 +10,18 @@ interface PageProps {
 async function Page({ params }: PageProps) {
   const resolvedParams = await params
   
-  // Podemos intentar decodificar el ID en el servidor para depuración
-  try {
-    // Lamentablemente, atob no está disponible en el servidor de Next.js
-    // Esta parte la manejará el cliente
-    console.log("ID recibido en el servidor:", resolvedParams.id);
-  } catch (error) {
-    console.error("Error al decodificar en el servidor:", error);
-  }
-  
   return (
-    <>
-      {/* Pasar el ID al componente cliente para procesamiento */}
+    <div className="bg-transparent">
+      <style jsx global>{`
+        body {
+          background: transparent !important;
+          min-height: unset !important;
+          margin: 0 !important;
+          padding: 0 !important;
+        }
+      `}</style>
       <WidgetClient id={resolvedParams.id} />
-    </>
+    </div>
   )
 }
 
