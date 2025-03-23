@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { requestProvider, type WebLNProvider } from "webln"
 import { Button } from "@/app/components/ui/button"
 import { QRCodeSVG } from "qrcode.react"
-import { WebLNGuide } from "./webln-guide"
+import WidgetInfoTooltip from "./widget-info-tooltip"
 import RoboAvatar from "./ui/robo-avatar"
 import CustomAvatar from "./ui/custom-avatar"
 import { bech32 } from 'bech32'
@@ -564,7 +564,7 @@ export default function WebLNBoostButton({
         {weblnError && !hideWebLNGuide && (
           <div className="absolute -bottom-2 left-0 right-0 transform translate-y-full pt-4 z-10">
             <div className="bg-white rounded-lg shadow-lg p-4">
-              <WebLNGuide />
+              <WidgetInfoTooltip />
             </div>
           </div>
         )}
