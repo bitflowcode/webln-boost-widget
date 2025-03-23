@@ -117,7 +117,7 @@ const WidgetClient: FC<WidgetClientProps> = ({ id }) => {
 
   if (error) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gray-100">
+      <div className="flex items-center justify-center h-screen bg-transparent">
         <div className="text-center p-8 bg-white rounded-lg shadow-lg">
           <h1 className="text-2xl font-bold text-red-600 mb-4">Error</h1>
           <p className="text-gray-700">{error}</p>
@@ -131,7 +131,7 @@ const WidgetClient: FC<WidgetClientProps> = ({ id }) => {
 
   if (!config) {
     return (
-      <div className="flex items-center justify-center h-screen">
+      <div className="flex items-center justify-center h-screen bg-transparent">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#FF8C00]"></div>
       </div>
     )
@@ -158,16 +158,18 @@ const WidgetClient: FC<WidgetClientProps> = ({ id }) => {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-transparent">
-      <WebLNBoostButton
-        receiverType={config.receiverType}
-        receiver={config.receiver}
-        amounts={amounts}
-        labels={labels}
-        theme={config.theme}
-        avatarSeed={config.avatarSeed}
-        avatarSet={config.avatarSet}
-        image={config.image}
-      />
+      <div className="bg-transparent">
+        <WebLNBoostButton
+          receiverType={config.receiverType}
+          receiver={config.receiver}
+          amounts={amounts}
+          labels={labels}
+          theme={config.theme}
+          avatarSeed={config.avatarSeed}
+          avatarSet={config.avatarSet}
+          image={config.image}
+        />
+      </div>
     </div>
   )
 }
