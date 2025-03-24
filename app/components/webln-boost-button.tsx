@@ -150,14 +150,16 @@ export default function WebLNBoostButton({
           
           // Esperar a que webln esté disponible
           let attempts = 0
-          const maxAttempts = 10
+          const maxAttempts = 20 // Aumentamos el número de intentos
           const checkWebLN = async () => {
-            if (typeof window !== 'undefined' && 'webln' in window) {
-              console.log('WebLN detectado en window')
+            if (typeof window !== 'undefined' && ('webln' in window || 'alby' in window)) {
+              console.log('WebLN o Alby detectado en window')
               try {
+                // Intentar obtener el provider
                 const provider = await requestProvider()
                 console.log('Provider obtenido:', provider)
                 
+                // Intentar habilitar el provider
                 await provider.enable()
                 console.log('WebLN habilitado correctamente')
                 setWebln(provider)
@@ -170,7 +172,9 @@ export default function WebLNBoostButton({
               attempts++
               if (attempts < maxAttempts) {
                 console.log(`Intento ${attempts} de ${maxAttempts}...`)
-                setTimeout(checkWebLN, 500)
+                // Aumentamos el tiempo entre intentos gradualmente
+                const delay = Math.min(500 + (attempts * 100), 2000)
+                setTimeout(checkWebLN, delay)
               } else {
                 console.log('WebLN no detectado después de múltiples intentos')
                 setWeblnError("No se detectó una billetera compatible con WebLN")
@@ -178,7 +182,8 @@ export default function WebLNBoostButton({
             }
           }
           
-          checkWebLN()
+          // Iniciar la verificación después de un breve retraso inicial
+          setTimeout(checkWebLN, 1000)
         }
       } catch (initError) {
         console.error("Error al inicializar WebLN:", initError)
@@ -186,7 +191,18 @@ export default function WebLNBoostButton({
       }
     }
 
+    // Limpiar estado al montar
+    setWebln(null)
+    setWeblnError("")
+    
+    // Iniciar la detección
     initWebLN()
+    
+    // Cleanup
+    return () => {
+      setWebln(null)
+      setWeblnError("")
+    }
   }, [isMobile, hideWebLNGuide])
 
   const handleWebLNError = (error: unknown) => {
@@ -208,26 +224,26 @@ export default function WebLNBoostButton({
   }
 
   useEffect(() => {
-    console.log('WebLNBoostButton props:', { 
-      receiverType, 
-      receiver, 
-      amounts, 
-      labels, 
-      theme, 
-      avatarSeed, 
-      avatarSet, 
-      image 
-    })
-    
     // Manejar imagen personalizada
     if (image) {
+      console.log('Procesando imagen:', image)
+      
       // Intentar decodificar si parece una URL codificada en base64
       let imageUrl = image
       if (/^[A-Za-z0-9_-]+={0,2}$/.test(image)) {
         try {
-          const decoded = atob(image.padEnd(image.length + ((4 - (image.length % 4)) % 4), '='))
+          // Convertir base64url a base64 estándar
+          const base64 = image
+            .replace(/-/g, '+')
+            .replace(/_/g, '/')
+            .padEnd(image.length + ((4 - (image.length % 4)) % 4), '=')
+          
+          const decoded = atob(base64)
+          console.log('URL decodificada:', decoded)
+          
           if (decoded.startsWith('http')) {
             imageUrl = decoded
+            console.log('URL válida encontrada:', imageUrl)
           }
         } catch (e) {
           console.error('Error decodificando URL de imagen:', e)
@@ -239,20 +255,12 @@ export default function WebLNBoostButton({
       img.onload = () => {
         console.log('Imagen cargada correctamente:', imageUrl)
       }
-      img.onerror = () => {
-        console.error('Error cargando imagen:', imageUrl)
+      img.onerror = (e) => {
+        console.error('Error cargando imagen:', imageUrl, e)
       }
       img.src = imageUrl
     }
-    
-    console.log('Avatar debug info:', {
-      hasAvatarSeed: Boolean(avatarSeed),
-      avatarSeedValue: avatarSeed,
-      avatarSetValue: avatarSet,
-      hasImage: Boolean(image),
-      imageValue: image
-    })
-  }, [receiverType, receiver, amounts, labels, theme, avatarSeed, avatarSet, image])
+  }, [image])
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout | null = null;
@@ -489,17 +497,35 @@ export default function WebLNBoostButton({
 
   const currentThemeColor = themeColors[theme as keyof typeof themeColors] || themeColors.orange
 
+  const renderAvatar = () => {
+    if (image) {
+      let imageUrl = image
+      if (/^[A-Za-z0-9_-]+={0,2}$/.test(image)) {
+        try {
+          const base64 = image
+            .replace(/-/g, '+')
+            .replace(/_/g, '/')
+            .padEnd(image.length + ((4 - (image.length % 4)) % 4), '=')
+          const decoded = atob(base64)
+          if (decoded.startsWith('http')) {
+            imageUrl = decoded
+          }
+        } catch (e) {
+          console.error('Error decodificando URL en renderAvatar:', e)
+        }
+      }
+      return <CustomAvatar imageUrl={imageUrl} size={128} />
+    }
+    return <RoboAvatar seed={avatarSeed || 'default'} set={avatarSet} size={128} />
+  }
+
   const renderStep = () => {
     switch (step) {
       case "initial":
         return (
           <div className="flex flex-col items-center gap-6">
             <div className="w-32 h-32 relative">
-              {image ? (
-                <CustomAvatar imageUrl={image} size={128} />
-              ) : (
-                <RoboAvatar seed={avatarSeed || 'default'} set={avatarSet} size={128} />
-              )}
+              {renderAvatar()}
             </div>
             <h2 className="text-4xl font-bold text-white">Bitflow</h2>
             <Button
