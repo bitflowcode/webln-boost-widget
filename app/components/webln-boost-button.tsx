@@ -361,9 +361,18 @@ export default function WebLNBoostButton({
         resetToInitialState()
       } catch (weblnError) {
         console.error("Error detallado en pago WebLN:", weblnError)
-        if (weblnError instanceof Error && weblnError.message?.includes('User rejected')) {
-          setWeblnError("Pago cancelado por el usuario.")
-          setStep("initial")
+        if (weblnError instanceof Error) {
+          if (weblnError.message?.includes('User rejected')) {
+            setWeblnError("Pago cancelado por el usuario.")
+            setStep("initial")
+          } else if (weblnError.message?.includes('not authorized') || weblnError.message?.includes('Permission denied')) {
+            setWeblnError("Este sitio necesita autorización en Alby para pagar directamente. Por favor, autoriza el sitio en la extensión Alby y vuelve a intentarlo.")
+            setStep("qr")
+          } else {
+            console.log('Mostrando QR después de error WebLN')
+            setInvoice(invoice)
+            setStep("qr")
+          }
         } else {
           console.log('Mostrando QR después de error WebLN')
           setInvoice(invoice)
