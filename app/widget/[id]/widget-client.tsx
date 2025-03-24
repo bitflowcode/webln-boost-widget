@@ -25,11 +25,14 @@ export default function WidgetClient({ id }: WidgetClientProps) {
 
   useEffect(() => {
     try {
-      const decodedConfig = JSON.parse(atob(id))
+      // Decodificar el base64 y luego decodificar los caracteres especiales
+      const decodedBase64 = atob(id)
+      const decodedString = decodeURIComponent(escape(decodedBase64))
+      const decodedConfig = JSON.parse(decodedString)
       setConfig(decodedConfig)
     } catch (err) {
+      console.error('Error al decodificar:', err)
       setError('Error al decodificar la configuración del widget')
-      console.error(err)
     }
   }, [id])
 

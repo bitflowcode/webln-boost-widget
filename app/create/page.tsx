@@ -50,14 +50,7 @@ export default function CreatePage() {
   useEffect(() => {
     if (isClient) {
       // Generar código del widget
-      const configBase64 = btoa(JSON.stringify(config))
-      const code = `<script src="https://www.bitflow.site/widget.js"></script>
-<div id="bitflow-widget" data-config='${JSON.stringify(config)}'></div>`
-      setWidgetCode(code)
-
-      // Generar URL compartible
-      const shareUrl = `https://www.bitflow.site/widget/${configBase64}`
-      setShareUrl(shareUrl)
+      generateWidgetCode()
     }
   }, [config, isClient])
 
@@ -77,6 +70,38 @@ export default function CreatePage() {
       .catch(err => {
         console.error('Error al copiar:', err)
       })
+  }
+
+  const generateWidgetCode = () => {
+    const widgetConfig = {
+      receiverType: config.receiverType,
+      receiver: config.receiver,
+      amounts: config.amounts.split(',').join(','),
+      labels: config.labels.split(',').join(','),
+      theme: config.theme,
+      useCustomImage: config.useCustomImage,
+      ...(config.useCustomImage ? { image: config.image } : { avatarSeed: config.avatarSeed, avatarSet: config.avatarSet }),
+    }
+
+    // Codificar los caracteres especiales antes de convertir a base64
+    const jsonString = JSON.stringify(widgetConfig)
+    const encodedString = unescape(encodeURIComponent(jsonString))
+    const base64Config = btoa(encodedString)
+
+    setWidgetCode(`<div id="bitflow-widget"></div>
+<script>
+  (function() {
+    var script = document.createElement('script');
+    script.src = 'https://www.bitflow.site/widget.js';
+    script.defer = true;
+    script.onload = function() {
+      BitflowWidget.mount('#bitflow-widget', '${base64Config}');
+    };
+    document.head.appendChild(script);
+  })();
+</script>`)
+
+    setShareUrl(`https://www.bitflow.site/widget/${base64Config}`)
   }
 
   // No renderizar el widget durante SSR
