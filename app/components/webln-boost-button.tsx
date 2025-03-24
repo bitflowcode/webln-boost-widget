@@ -146,53 +146,113 @@ export default function WebLNBoostButton({
       try {
         // Solo intentar WebLN en desktop y si no está oculta la guía
         if (!isMobile && !hideWebLNGuide) {
-          console.log('Intentando detectar WebLN...')
+          console.log('Verificando disponibilidad de WebLN...')
           
-          // Verificar si webln está disponible en window
-          if (typeof window !== 'undefined' && 'webln' in window) {
-            console.log('WebLN detectado en window')
-          }
-          
-          const provider = await requestProvider()
-          console.log('Provider obtenido:', provider)
-          
-          try {
-            await provider.enable()
-            console.log('WebLN habilitado correctamente')
-            setWebln(provider)
-            setWeblnError("")
-          } catch (enableError) {
-            console.error("Error al habilitar WebLN:", enableError)
-            setWebln(null)
-            if (enableError instanceof Error && 
-                (enableError.message?.toLowerCase().includes('not authorized') || 
-                 enableError.message?.toLowerCase().includes('permission denied'))) {
-              setWeblnError("Este sitio necesita autorización en Alby. Por favor, autoriza el sitio en la extensión y recarga la página.")
+          // Esperar a que webln esté disponible
+          let attempts = 0
+          const maxAttempts = 10
+          const checkWebLN = async () => {
+            if (typeof window !== 'undefined' && 'webln' in window) {
+              console.log('WebLN detectado en window')
+              try {
+                const provider = await requestProvider()
+                console.log('Provider obtenido:', provider)
+                
+                await provider.enable()
+                console.log('WebLN habilitado correctamente')
+                setWebln(provider)
+                setWeblnError("")
+              } catch (enableError) {
+                console.error("Error al habilitar WebLN:", enableError)
+                handleWebLNError(enableError)
+              }
             } else {
-              setWeblnError("Error al conectar con la billetera WebLN")
+              attempts++
+              if (attempts < maxAttempts) {
+                console.log(`Intento ${attempts} de ${maxAttempts}...`)
+                setTimeout(checkWebLN, 500)
+              } else {
+                console.log('WebLN no detectado después de múltiples intentos')
+                setWeblnError("No se detectó una billetera compatible con WebLN")
+              }
             }
           }
+          
+          checkWebLN()
         }
       } catch (initError) {
         console.error("Error al inicializar WebLN:", initError)
-        setWebln(null)
-        if (!isMobile && !hideWebLNGuide) {
-          if (initError instanceof Error && initError.message?.toLowerCase().includes('no provider available')) {
-            setWeblnError("No se detectó una billetera compatible con WebLN")
-          } else {
-            setWeblnError("Error al inicializar WebLN")
-          }
-        }
+        handleWebLNError(initError)
       }
     }
 
-    // Intentar inicializar WebLN después de un breve retraso para asegurar que la extensión esté cargada
-    const timer = setTimeout(() => {
-      initWebLN()
-    }, 500)
-
-    return () => clearTimeout(timer)
+    initWebLN()
   }, [isMobile, hideWebLNGuide])
+
+  const handleWebLNError = (error: unknown) => {
+    setWebln(null)
+    if (!isMobile && !hideWebLNGuide) {
+      if (error instanceof Error) {
+        if (error.message?.toLowerCase().includes('not authorized') || 
+            error.message?.toLowerCase().includes('permission denied')) {
+          setWeblnError("Este sitio necesita autorización en Alby. Por favor, autoriza el sitio en la extensión y recarga la página.")
+        } else if (error.message?.toLowerCase().includes('no provider available')) {
+          setWeblnError("No se detectó una billetera compatible con WebLN")
+        } else {
+          setWeblnError("Error al inicializar WebLN")
+        }
+      } else {
+        setWeblnError("Error desconocido al inicializar WebLN")
+      }
+    }
+  }
+
+  useEffect(() => {
+    console.log('WebLNBoostButton props:', { 
+      receiverType, 
+      receiver, 
+      amounts, 
+      labels, 
+      theme, 
+      avatarSeed, 
+      avatarSet, 
+      image 
+    })
+    
+    // Manejar imagen personalizada
+    if (image) {
+      // Intentar decodificar si parece una URL codificada en base64
+      let imageUrl = image
+      if (/^[A-Za-z0-9_-]+={0,2}$/.test(image)) {
+        try {
+          const decoded = atob(image.padEnd(image.length + ((4 - (image.length % 4)) % 4), '='))
+          if (decoded.startsWith('http')) {
+            imageUrl = decoded
+          }
+        } catch (e) {
+          console.error('Error decodificando URL de imagen:', e)
+        }
+      }
+      
+      // Precargar la imagen
+      const img = new window.Image()
+      img.onload = () => {
+        console.log('Imagen cargada correctamente:', imageUrl)
+      }
+      img.onerror = () => {
+        console.error('Error cargando imagen:', imageUrl)
+      }
+      img.src = imageUrl
+    }
+    
+    console.log('Avatar debug info:', {
+      hasAvatarSeed: Boolean(avatarSeed),
+      avatarSeedValue: avatarSeed,
+      avatarSetValue: avatarSet,
+      hasImage: Boolean(image),
+      imageValue: image
+    })
+  }, [receiverType, receiver, amounts, labels, theme, avatarSeed, avatarSet, image])
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout | null = null;

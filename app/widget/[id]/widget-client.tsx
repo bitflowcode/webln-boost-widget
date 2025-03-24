@@ -37,16 +37,17 @@ function base64urlDecode(str: string): string {
 
 // Función para decodificar URLs en base64 dentro del JSON
 function decodeBase64Urls(jsonStr: string): string {
-  return jsonStr.replace(/"([A-Za-z0-9_-]+)"/, (match, encoded) => {
+  return jsonStr.replace(/"([A-Za-z0-9_-]+={0,2})"/, (match, encoded) => {
     try {
-      // Solo intentar decodificar si parece una URL codificada
-      if (encoded.length > 20) { // URLs codificadas suelen ser largas
-        const decoded = base64urlDecode(encoded)
-        if (decoded.startsWith('http')) {
-          return `"${decoded}"`
-        }
+      // Intentar decodificar todas las cadenas que parecen base64
+      const decoded = base64urlDecode(encoded)
+      // Verificar si es una URL válida
+      try {
+        new URL(decoded)
+        return `"${decoded}"`
+      } catch {
+        return match
       }
-      return match
     } catch {
       return match
     }
@@ -61,12 +62,15 @@ export default function WidgetClient({ id }: WidgetClientProps) {
     try {
       // Decodificar base64url
       const decodedBase64 = base64urlDecode(id)
+      console.log('Config base64 decodificada:', decodedBase64)
       
       // Decodificar URLs en base64 dentro del JSON
       const decodedJson = decodeBase64Urls(decodedBase64)
+      console.log('Config con URLs decodificadas:', decodedJson)
       
       // Parsear la configuración
       const decodedConfig = JSON.parse(decodedJson)
+      console.log('Config final:', decodedConfig)
       
       // Validar la configuración
       if (!decodedConfig.receiverType || !decodedConfig.receiver) {
