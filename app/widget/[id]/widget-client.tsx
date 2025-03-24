@@ -47,6 +47,16 @@ export default function WidgetClient({ id }: WidgetClientProps) {
       const decodedBase64 = base64urlDecode(id)
       // Decodificar la configuración
       const decodedString = decodeURIComponent(escape(decodedBase64))
+        .replace(/"([A-Za-z0-9_-]+={0,2})"/, (match, encoded) => {
+          try {
+            // Intentar decodificar la URL codificada
+            const decodedUrl = atob(encoded.padEnd(encoded.length + (4 - (encoded.length % 4)) % 4, '='))
+            return `"${decodedUrl}"`
+          } catch {
+            // Si falla, devolver el match original
+            return match
+          }
+        })
       const decodedConfig = JSON.parse(decodedString)
       setConfig(decodedConfig)
     } catch (err) {

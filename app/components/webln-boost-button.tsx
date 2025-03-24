@@ -147,9 +147,21 @@ export default function WebLNBoostButton({
         // Solo intentar WebLN en desktop y si no está oculta la guía
         if (!isMobile && !hideWebLNGuide) {
           const provider = await requestProvider()
-          await provider.enable() // Intentar habilitar inmediatamente
-          setWebln(provider)
-          setWeblnError("")
+          try {
+            await provider.enable() // Intentar habilitar inmediatamente
+            setWebln(provider)
+            setWeblnError("")
+          } catch (enableError) {
+            console.error("Error al habilitar WebLN:", enableError)
+            setWebln(null)
+            if (enableError instanceof Error && 
+                (enableError.message?.includes('not authorized') || 
+                 enableError.message?.includes('Permission denied'))) {
+              setWeblnError("Este sitio necesita autorización en Alby. Por favor, autoriza el sitio en la extensión y recarga la página.")
+            } else {
+              setWeblnError("Error al conectar con la billetera WebLN")
+            }
+          }
         }
       } catch (initError) {
         console.error("WebLN no está disponible:", initError)

@@ -112,8 +112,13 @@ export default function CreatePage() {
 
     // Codificar para la URL compartible
     const jsonString = JSON.stringify(widgetConfig)
+    // Primero codificar la URL en base64 para evitar problemas con caracteres especiales
     const encodedString = unescape(encodeURIComponent(jsonString))
-    // Convertir a base64 y luego a base64url sin padding
+      .replace(/(https?:\/\/[^"]+)/g, (url) => {
+        return btoa(url).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+      })
+    
+    // Luego codificar toda la configuración
     const base64Config = btoa(encodedString)
       .replace(/\+/g, '-')
       .replace(/\//g, '_')
