@@ -76,30 +76,23 @@ export default function CreatePage() {
     const widgetConfig = {
       receiverType: config.receiverType,
       receiver: config.receiver,
-      amounts: config.amounts.split(',').join(','),
+      amounts: config.amounts.split(',').map(Number).join(','),
       labels: config.labels.split(',').join(','),
       theme: config.theme,
       useCustomImage: config.useCustomImage,
-      ...(config.useCustomImage ? { image: config.image } : { avatarSeed: config.avatarSeed, avatarSet: config.avatarSet }),
+      ...(config.useCustomImage && config.image ? { image: config.image } : { 
+        avatarSeed: config.avatarSeed, 
+        avatarSet: config.avatarSet 
+      }),
     }
 
     // Generar URL con parámetros para iframe
-    const params = new URLSearchParams({
-      receiverType: widgetConfig.receiverType,
-      receiver: widgetConfig.receiver,
-      amounts: widgetConfig.amounts,
-      labels: widgetConfig.labels,
-      theme: widgetConfig.theme,
-      useCustomImage: widgetConfig.useCustomImage.toString(),
+    const params = new URLSearchParams()
+    Object.entries(widgetConfig).forEach(([key, value]) => {
+      if (value !== undefined) {
+        params.append(key, String(value))
+      }
     })
-
-    // Añadir parámetros condicionales
-    if (widgetConfig.useCustomImage && 'image' in widgetConfig) {
-      params.append('image', widgetConfig.image || '')
-    } else if (!widgetConfig.useCustomImage && 'avatarSeed' in widgetConfig && 'avatarSet' in widgetConfig) {
-      params.append('avatarSeed', widgetConfig.avatarSeed || '')
-      params.append('avatarSet', widgetConfig.avatarSet || '')
-    }
 
     // Código del iframe
     const iframeCode = `<iframe 
@@ -112,14 +105,18 @@ export default function CreatePage() {
 
     // Codificar para la URL compartible
     const jsonString = JSON.stringify(widgetConfig)
-    // Primero codificar la URL en base64 para evitar problemas con caracteres especiales
-    const encodedString = unescape(encodeURIComponent(jsonString))
-      .replace(/(https?:\/\/[^"]+)/g, (url) => {
-        return btoa(url).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
-      })
     
-    // Luego codificar toda la configuración
-    const base64Config = btoa(encodedString)
+    // Codificar URLs en el JSON antes de codificar todo
+    const encodedJson = jsonString.replace(/(https?:\/\/[^"]+)/g, (url) => {
+      const base64url = btoa(url)
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=+$/, '')
+      return base64url
+    })
+    
+    // Codificar toda la configuración
+    const base64Config = btoa(encodedJson)
       .replace(/\+/g, '-')
       .replace(/\//g, '_')
       .replace(/=+$/, '')

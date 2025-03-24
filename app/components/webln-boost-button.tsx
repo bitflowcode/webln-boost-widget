@@ -146,17 +146,27 @@ export default function WebLNBoostButton({
       try {
         // Solo intentar WebLN en desktop y si no está oculta la guía
         if (!isMobile && !hideWebLNGuide) {
+          console.log('Intentando detectar WebLN...')
+          
+          // Verificar si webln está disponible en window
+          if (typeof window !== 'undefined' && 'webln' in window) {
+            console.log('WebLN detectado en window')
+          }
+          
           const provider = await requestProvider()
+          console.log('Provider obtenido:', provider)
+          
           try {
-            await provider.enable() // Intentar habilitar inmediatamente
+            await provider.enable()
+            console.log('WebLN habilitado correctamente')
             setWebln(provider)
             setWeblnError("")
           } catch (enableError) {
             console.error("Error al habilitar WebLN:", enableError)
             setWebln(null)
             if (enableError instanceof Error && 
-                (enableError.message?.includes('not authorized') || 
-                 enableError.message?.includes('Permission denied'))) {
+                (enableError.message?.toLowerCase().includes('not authorized') || 
+                 enableError.message?.toLowerCase().includes('permission denied'))) {
               setWeblnError("Este sitio necesita autorización en Alby. Por favor, autoriza el sitio en la extensión y recarga la página.")
             } else {
               setWeblnError("Error al conectar con la billetera WebLN")
@@ -164,14 +174,24 @@ export default function WebLNBoostButton({
           }
         }
       } catch (initError) {
-        console.error("WebLN no está disponible:", initError)
+        console.error("Error al inicializar WebLN:", initError)
         setWebln(null)
         if (!isMobile && !hideWebLNGuide) {
-          setWeblnError("No se detectó una billetera compatible con WebLN")
+          if (initError instanceof Error && initError.message?.toLowerCase().includes('no provider available')) {
+            setWeblnError("No se detectó una billetera compatible con WebLN")
+          } else {
+            setWeblnError("Error al inicializar WebLN")
+          }
         }
       }
     }
-    initWebLN()
+
+    // Intentar inicializar WebLN después de un breve retraso para asegurar que la extensión esté cargada
+    const timer = setTimeout(() => {
+      initWebLN()
+    }, 500)
+
+    return () => clearTimeout(timer)
   }, [isMobile, hideWebLNGuide])
 
   useEffect(() => {

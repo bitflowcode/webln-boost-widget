@@ -25,16 +25,32 @@ function base64urlDecode(str: string): string {
   const base64 = str
     .replace(/-/g, '+')
     .replace(/_/g, '/')
+    .padEnd(str.length + ((4 - (str.length % 4)) % 4), '=')
 
   try {
-    // Intentar decodificar sin padding
     return atob(base64)
-  } catch {
-    // Si falla, intentar con padding
-    const pad = 4 - (base64.length % 4)
-    const paddedBase64 = pad === 4 ? base64 : base64 + '='.repeat(pad)
-    return atob(paddedBase64)
+  } catch (error) {
+    console.error('Error decodificando base64:', error)
+    throw error
   }
+}
+
+// Función para decodificar URLs en base64 dentro del JSON
+function decodeBase64Urls(jsonStr: string): string {
+  return jsonStr.replace(/"([A-Za-z0-9_-]+)"/, (match, encoded) => {
+    try {
+      // Solo intentar decodificar si parece una URL codificada
+      if (encoded.length > 20) { // URLs codificadas suelen ser largas
+        const decoded = base64urlDecode(encoded)
+        if (decoded.startsWith('http')) {
+          return `"${decoded}"`
+        }
+      }
+      return match
+    } catch {
+      return match
+    }
+  })
 }
 
 export default function WidgetClient({ id }: WidgetClientProps) {
@@ -45,19 +61,18 @@ export default function WidgetClient({ id }: WidgetClientProps) {
     try {
       // Decodificar base64url
       const decodedBase64 = base64urlDecode(id)
-      // Decodificar la configuración
-      const decodedString = decodeURIComponent(escape(decodedBase64))
-        .replace(/"([A-Za-z0-9_-]+={0,2})"/, (match, encoded) => {
-          try {
-            // Intentar decodificar la URL codificada
-            const decodedUrl = atob(encoded.padEnd(encoded.length + (4 - (encoded.length % 4)) % 4, '='))
-            return `"${decodedUrl}"`
-          } catch {
-            // Si falla, devolver el match original
-            return match
-          }
-        })
-      const decodedConfig = JSON.parse(decodedString)
+      
+      // Decodificar URLs en base64 dentro del JSON
+      const decodedJson = decodeBase64Urls(decodedBase64)
+      
+      // Parsear la configuración
+      const decodedConfig = JSON.parse(decodedJson)
+      
+      // Validar la configuración
+      if (!decodedConfig.receiverType || !decodedConfig.receiver) {
+        throw new Error('Configuración del widget inválida')
+      }
+      
       setConfig(decodedConfig)
     } catch (err) {
       console.error('Error al decodificar:', err)
