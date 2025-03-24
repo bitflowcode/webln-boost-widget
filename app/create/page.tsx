@@ -35,6 +35,8 @@ const defaultConfig: WidgetConfig = {
 export default function CreatePage() {
   const [isClient, setIsClient] = useState(false)
   const [config, setConfig] = useState<WidgetConfig>(defaultConfig)
+  const [widgetCode, setWidgetCode] = useState('')
+  const [shareUrl, setShareUrl] = useState('')
 
   useEffect(() => {
     setIsClient(true)
@@ -45,11 +47,36 @@ export default function CreatePage() {
     }))
   }, [])
 
+  useEffect(() => {
+    if (isClient) {
+      // Generar código del widget
+      const configBase64 = btoa(JSON.stringify(config))
+      const code = `<script src="https://www.bitflow.site/widget.js"></script>
+<div id="bitflow-widget" data-config='${JSON.stringify(config)}'></div>`
+      setWidgetCode(code)
+
+      // Generar URL compartible
+      const shareUrl = `https://www.bitflow.site/widget/${configBase64}`
+      setShareUrl(shareUrl)
+    }
+  }, [config, isClient])
+
   const handleConfigChange = (field: keyof WidgetConfig, value: string | boolean) => {
     setConfig(prev => ({
       ...prev,
       [field]: value
     }))
+  }
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text)
+      .then(() => {
+        // Aquí podrías añadir alguna notificación de éxito
+        console.log('Copiado al portapapeles')
+      })
+      .catch(err => {
+        console.error('Error al copiar:', err)
+      })
   }
 
   // No renderizar el widget durante SSR
@@ -236,57 +263,47 @@ export default function CreatePage() {
             </div>
           </div>
 
-          {/* Código para tu Web */}
-          <div className="mt-12">
-            <h2 className="text-2xl font-bold mb-4 text-white">Código para tu Web</h2>
-            <div className="relative">
-              <pre className="bg-white/10 p-4 rounded-lg overflow-x-auto text-white">
-                <code className="text-sm">
-                  {`<iframe 
-  src="https://bitflow.site/widget-params?${new URLSearchParams({
-    receiverType: config.receiverType,
-    receiver: config.receiver,
-    amounts: config.amounts,
-    labels: config.labels,
-    theme: config.theme,
-    useCustomImage: config.useCustomImage.toString(),
-    ...(config.useCustomImage && config.image ? { image: config.image } : {}),
-    ...(!config.useCustomImage ? { 
-      avatarSeed: config.avatarSeed || '',
-      avatarSet: config.avatarSet || 'set1'
-    } : {})
-  }).toString()}"
-  style="width: 460px; height: 460px; border: none; background: transparent;"
-  allowtransparency="true"
-></iframe>`}
-                </code>
-              </pre>
-              <button
-                type="button"
-                onClick={() => {
-                  const code = `<iframe 
-  src="https://bitflow.site/widget-params?${new URLSearchParams({
-    receiverType: config.receiverType,
-    receiver: config.receiver,
-    amounts: config.amounts,
-    labels: config.labels,
-    theme: config.theme,
-    useCustomImage: config.useCustomImage.toString(),
-    ...(config.useCustomImage && config.image ? { image: config.image } : {}),
-    ...(!config.useCustomImage ? { 
-      avatarSeed: config.avatarSeed || '',
-      avatarSet: config.avatarSet || 'set1'
-    } : {})
-  }).toString()}"
-  style="width: 460px; height: 460px; border: none; background: transparent;"
-  allowtransparency="true"
-></iframe>`;
-                  navigator.clipboard.writeText(code);
-                }}
-                className="absolute top-2 right-2 px-3 py-1 text-sm bg-white/10 text-white rounded shadow hover:bg-white/20"
-              >
-                Copiar
-              </button>
+          {/* Código del Widget y URL Compartible */}
+          <div className="space-y-8 mt-12">
+            <div className="bg-[#2d2d2d] p-6 rounded-xl">
+              <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                <span>📱</span>
+                <span>Compartir en redes</span>
+              </h2>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  readOnly
+                  value={shareUrl}
+                  className="flex-1 bg-black/30 text-white p-3 rounded-lg font-mono text-sm"
+                />
+                <button
+                  onClick={() => copyToClipboard(shareUrl)}
+                  className="px-4 py-2 bg-[#FF8C00] text-white rounded-lg hover:bg-[#FF8C00]/90 transition-colors"
+                >
+                  Copiar
+                </button>
+              </div>
+            </div>
+
+            <div className="bg-[#2d2d2d] p-6 rounded-xl">
+              <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                <span>💻</span>
+                <span>Insertar en tu web</span>
+              </h2>
+              <div className="flex gap-2">
+                <textarea
+                  readOnly
+                  value={widgetCode}
+                  className="flex-1 bg-black/30 text-white p-3 rounded-lg font-mono text-sm h-24"
+                />
+                <button
+                  onClick={() => copyToClipboard(widgetCode)}
+                  className="px-4 py-2 bg-[#FF8C00] text-white rounded-lg hover:bg-[#FF8C00]/90 transition-colors"
+                >
+                  Copiar
+                </button>
+              </div>
             </div>
           </div>
         </form>
