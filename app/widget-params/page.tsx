@@ -3,21 +3,23 @@ import WidgetStyles from '@/app/widget/[id]/widget-styles'
 
 type AvatarSet = 'set1' | 'set2' | 'set3' | 'set4' | 'set5'
 
-interface PageProps {
-  searchParams: {
-    receiverType: 'lightning' | 'lnurl' | 'node'
-    receiver: string
-    amounts: string
-    labels: string
-    theme: string
-    useCustomImage: string
-    image?: string
-    avatarSeed?: string
-    avatarSet?: AvatarSet
-  }
+interface WidgetParams {
+  receiverType: 'lightning' | 'lnurl' | 'node'
+  receiver: string
+  amounts: string
+  labels: string
+  theme: string
+  useCustomImage: string
+  image?: string
+  avatarSeed?: string
+  avatarSet?: AvatarSet
 }
 
-export default function WidgetParamsPage({ searchParams }: PageProps) {
+interface PageProps {
+  searchParams: Promise<WidgetParams>
+}
+
+export default async function WidgetParamsPage({ searchParams }: PageProps) {
   const {
     receiverType,
     receiver,
@@ -28,7 +30,7 @@ export default function WidgetParamsPage({ searchParams }: PageProps) {
     image,
     avatarSeed,
     avatarSet,
-  } = searchParams
+  } = await searchParams
 
   return (
     <div className="bg-transparent">
