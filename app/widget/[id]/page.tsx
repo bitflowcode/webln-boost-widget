@@ -30,6 +30,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       },
     }
   } catch (error) {
+    console.error('Error generando metadatos:', error)
     return {
       title: 'Bitflow Widget',
       description: 'Widget de donaciones Bitcoin Lightning',
