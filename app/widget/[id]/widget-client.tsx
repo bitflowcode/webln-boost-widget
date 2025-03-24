@@ -19,14 +19,33 @@ interface WidgetConfig {
   avatarSet?: 'set1' | 'set2' | 'set3' | 'set4' | 'set5'
 }
 
+// Función para decodificar base64url sin padding
+function base64urlDecode(str: string): string {
+  // Convertir base64url a base64
+  const base64 = str
+    .replace(/-/g, '+')
+    .replace(/_/g, '/')
+
+  try {
+    // Intentar decodificar sin padding
+    return atob(base64)
+  } catch {
+    // Si falla, intentar con padding
+    const pad = 4 - (base64.length % 4)
+    const paddedBase64 = pad === 4 ? base64 : base64 + '='.repeat(pad)
+    return atob(paddedBase64)
+  }
+}
+
 export default function WidgetClient({ id }: WidgetClientProps) {
   const [config, setConfig] = useState<WidgetConfig | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     try {
-      // Decodificar el base64 y luego decodificar los caracteres especiales
-      const decodedBase64 = atob(id)
+      // Decodificar base64url
+      const decodedBase64 = base64urlDecode(id)
+      // Decodificar la configuración
       const decodedString = decodeURIComponent(escape(decodedBase64))
       const decodedConfig = JSON.parse(decodedString)
       setConfig(decodedConfig)

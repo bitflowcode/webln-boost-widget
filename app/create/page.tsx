@@ -113,7 +113,12 @@ export default function CreatePage() {
     // Codificar para la URL compartible
     const jsonString = JSON.stringify(widgetConfig)
     const encodedString = unescape(encodeURIComponent(jsonString))
+    // Convertir a base64 y luego a base64url sin padding
     const base64Config = btoa(encodedString)
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '')
+    
     setShareUrl(`https://www.bitflow.site/widget/${base64Config}`)
   }
 
