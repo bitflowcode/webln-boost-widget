@@ -1,6 +1,8 @@
 import WebLNBoostButton from '@/app/components/webln-boost-button'
 import WidgetStyles from '@/app/widget/[id]/widget-styles'
 
+type AvatarSet = 'set1' | 'set2' | 'set3' | 'set4' | 'set5'
+
 interface PageProps {
   searchParams: {
     receiverType: 'lightning' | 'lnurl' | 'node'
@@ -11,7 +13,7 @@ interface PageProps {
     useCustomImage: string
     image?: string
     avatarSeed?: string
-    avatarSet?: string
+    avatarSet?: AvatarSet
   }
 }
 
@@ -40,7 +42,7 @@ export default function WidgetParamsPage({ searchParams }: PageProps) {
           theme={theme}
           image={useCustomImage === 'true' ? image : undefined}
           avatarSeed={useCustomImage !== 'true' ? avatarSeed : undefined}
-          avatarSet={useCustomImage !== 'true' ? avatarSet as any : undefined}
+          avatarSet={useCustomImage !== 'true' ? avatarSet : undefined}
           hideWebLNGuide={true}
         />
       </div>
