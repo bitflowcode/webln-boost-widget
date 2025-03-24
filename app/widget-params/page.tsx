@@ -1,19 +1,49 @@
-import { Suspense } from 'react'
-import WidgetParamsClient from './widget-params-client'
+import WebLNBoostButton from '@/app/components/webln-boost-button'
+import WidgetStyles from '@/app/widget/[id]/widget-styles'
 
 interface PageProps {
-  params: Promise<Record<string, never>>
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+  searchParams: {
+    receiverType: 'lightning' | 'lnurl' | 'node'
+    receiver: string
+    amounts: string
+    labels: string
+    theme: string
+    useCustomImage: string
+    image?: string
+    avatarSeed?: string
+    avatarSet?: string
+  }
 }
 
-export default async function WidgetParamsPage({
-  searchParams,
-}: PageProps) {
-  const resolvedSearchParams = await searchParams
+export default function WidgetParamsPage({ searchParams }: PageProps) {
+  const {
+    receiverType,
+    receiver,
+    amounts,
+    labels,
+    theme,
+    useCustomImage,
+    image,
+    avatarSeed,
+    avatarSet,
+  } = searchParams
 
   return (
-    <Suspense fallback={<div>Cargando...</div>}>
-      <WidgetParamsClient params={resolvedSearchParams} />
-    </Suspense>
+    <div className="bg-transparent">
+      <WidgetStyles />
+      <div className="flex items-center justify-center min-h-screen">
+        <WebLNBoostButton
+          receiverType={receiverType}
+          receiver={receiver}
+          amounts={amounts.split(',').map(Number)}
+          labels={labels.split(',')}
+          theme={theme}
+          image={useCustomImage === 'true' ? image : undefined}
+          avatarSeed={useCustomImage !== 'true' ? avatarSeed : undefined}
+          avatarSet={useCustomImage !== 'true' ? avatarSet as any : undefined}
+          hideWebLNGuide={true}
+        />
+      </div>
+    </div>
   )
 } 

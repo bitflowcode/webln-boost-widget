@@ -83,24 +83,37 @@ export default function CreatePage() {
       ...(config.useCustomImage ? { image: config.image } : { avatarSeed: config.avatarSeed, avatarSet: config.avatarSet }),
     }
 
-    // Codificar los caracteres especiales antes de convertir a base64
+    // Generar URL con parámetros para iframe
+    const params = new URLSearchParams({
+      receiverType: widgetConfig.receiverType,
+      receiver: widgetConfig.receiver,
+      amounts: widgetConfig.amounts,
+      labels: widgetConfig.labels,
+      theme: widgetConfig.theme,
+      useCustomImage: widgetConfig.useCustomImage.toString(),
+    })
+
+    // Añadir parámetros condicionales
+    if (widgetConfig.useCustomImage && 'image' in widgetConfig) {
+      params.append('image', widgetConfig.image || '')
+    } else if (!widgetConfig.useCustomImage && 'avatarSeed' in widgetConfig && 'avatarSet' in widgetConfig) {
+      params.append('avatarSeed', widgetConfig.avatarSeed || '')
+      params.append('avatarSet', widgetConfig.avatarSet || '')
+    }
+
+    // Código del iframe
+    const iframeCode = `<iframe 
+  src="https://www.bitflow.site/widget-params?${params.toString()}"
+  style="width: 460px; height: 460px; border: none; background: transparent;"
+  allowtransparency="true"
+></iframe>`
+
+    setWidgetCode(iframeCode)
+
+    // Codificar para la URL compartible
     const jsonString = JSON.stringify(widgetConfig)
     const encodedString = unescape(encodeURIComponent(jsonString))
     const base64Config = btoa(encodedString)
-
-    setWidgetCode(`<div id="bitflow-widget"></div>
-<script>
-  (function() {
-    var script = document.createElement('script');
-    script.src = 'https://www.bitflow.site/widget.js';
-    script.defer = true;
-    script.onload = function() {
-      BitflowWidget.mount('#bitflow-widget', '${base64Config}');
-    };
-    document.head.appendChild(script);
-  })();
-</script>`)
-
     setShareUrl(`https://www.bitflow.site/widget/${base64Config}`)
   }
 
