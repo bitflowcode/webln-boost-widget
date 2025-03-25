@@ -9,6 +9,14 @@ import RoboAvatar from "./ui/robo-avatar"
 import CustomAvatar from "./ui/custom-avatar"
 import { bech32 } from 'bech32'
 
+// Definir tipos para window.webln y window.alby
+declare global {
+  interface Window {
+    webln?: WebLNProvider & { _isEnabled?: boolean }
+    alby?: WebLNProvider & { _isEnabled?: boolean }
+  }
+}
+
 const RECIPIENT_ADDRESS = "bitflowz@getalby.com"
 
 interface WebLNBoostButtonProps {
@@ -154,6 +162,14 @@ export default function WebLNBoostButton({
             if (hasWebLN) {
               console.log('WebLN o Alby detectado')
               try {
+                // Verificar si webln está habilitado
+                const weblnProvider = window.webln || window.alby
+                if (weblnProvider && '_isEnabled' in weblnProvider && !weblnProvider._isEnabled) {
+                  console.log('WebLN detectado pero no habilitado')
+                  setWeblnError("Por favor, habilita la extensión Alby para poder pagar directamente desde tu navegador.")
+                  return
+                }
+
                 // Intentar obtener el provider
                 const provider = await requestProvider()
                 console.log('Provider obtenido:', provider)
@@ -212,6 +228,8 @@ export default function WebLNBoostButton({
           setWeblnError("Este sitio necesita autorización en Alby. Por favor, autoriza el sitio en la extensión y recarga la página.")
         } else if (error.message?.toLowerCase().includes('no provider available')) {
           setWeblnError("No se detectó una billetera compatible con WebLN")
+        } else if (error.message?.toLowerCase().includes('user rejected')) {
+          setWeblnError("Pago cancelado por el usuario")
         } else {
           setWeblnError("Error al inicializar WebLN")
         }
