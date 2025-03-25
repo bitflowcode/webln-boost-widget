@@ -105,16 +105,6 @@ export default function WebLNBoostButton({
       image 
     });
     
-    // Reset imageError when image url changes
-    if (image) {
-      // Precargar la imagen para detectar errores temprano
-      const img = new window.Image();
-      img.src = image;
-      img.onerror = () => {
-        console.error('Error precargando imagen:', image);
-      };
-    }
-    
     // Log more detailed information about the avatar values
     console.log('Avatar debug info:', {
       hasAvatarSeed: Boolean(avatarSeed),
@@ -123,7 +113,6 @@ export default function WebLNBoostButton({
       hasImage: Boolean(image),
       imageValue: image
     });
-    
   }, [receiverType, receiver, amounts, labels, theme, avatarSeed, avatarSet, image]);
 
   useEffect(() => {
@@ -150,10 +139,20 @@ export default function WebLNBoostButton({
           
           // Esperar a que webln esté disponible
           let attempts = 0
-          const maxAttempts = 20 // Aumentamos el número de intentos
+          const maxAttempts = 20
           const checkWebLN = async () => {
-            if (typeof window !== 'undefined' && ('webln' in window || 'alby' in window)) {
-              console.log('WebLN o Alby detectado en window')
+            // Verificar si estamos en un iframe
+            const isInIframe = window !== window.parent
+            
+            // Verificar disponibilidad de WebLN
+            const hasWebLN = typeof window !== 'undefined' && (
+              'webln' in window || 
+              'alby' in window || 
+              (isInIframe && window.parent && ('webln' in window.parent || 'alby' in window.parent))
+            )
+            
+            if (hasWebLN) {
+              console.log('WebLN o Alby detectado')
               try {
                 // Intentar obtener el provider
                 const provider = await requestProvider()
@@ -172,7 +171,6 @@ export default function WebLNBoostButton({
               attempts++
               if (attempts < maxAttempts) {
                 console.log(`Intento ${attempts} de ${maxAttempts}...`)
-                // Aumentamos el tiempo entre intentos gradualmente
                 const delay = Math.min(500 + (attempts * 100), 2000)
                 setTimeout(checkWebLN, delay)
               } else {
@@ -222,45 +220,6 @@ export default function WebLNBoostButton({
       }
     }
   }
-
-  useEffect(() => {
-    // Manejar imagen personalizada
-    if (image) {
-      console.log('Procesando imagen:', image)
-      
-      // Intentar decodificar si parece una URL codificada en base64
-      let imageUrl = image
-      if (/^[A-Za-z0-9_-]+={0,2}$/.test(image)) {
-        try {
-          // Convertir base64url a base64 estándar
-          const base64 = image
-            .replace(/-/g, '+')
-            .replace(/_/g, '/')
-            .padEnd(image.length + ((4 - (image.length % 4)) % 4), '=')
-          
-          const decoded = atob(base64)
-          console.log('URL decodificada:', decoded)
-          
-          if (decoded.startsWith('http')) {
-            imageUrl = decoded
-            console.log('URL válida encontrada:', imageUrl)
-          }
-        } catch (e) {
-          console.error('Error decodificando URL de imagen:', e)
-        }
-      }
-      
-      // Precargar la imagen
-      const img = new window.Image()
-      img.onload = () => {
-        console.log('Imagen cargada correctamente:', imageUrl)
-      }
-      img.onerror = (e) => {
-        console.error('Error cargando imagen:', imageUrl, e)
-      }
-      img.src = imageUrl
-    }
-  }, [image])
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout | null = null;
