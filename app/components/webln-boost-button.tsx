@@ -161,28 +161,8 @@ export default function WebLNBoostButton({
             
             if (hasWebLN) {
               console.log('WebLN o Alby detectado')
-              try {
-                // Verificar si webln está habilitado
-                const weblnProvider = window.webln || window.alby
-                if (weblnProvider && '_isEnabled' in weblnProvider && !weblnProvider._isEnabled) {
-                  console.log('WebLN detectado pero no habilitado')
-                  setWeblnError("Por favor, habilita la extensión Alby para poder pagar directamente desde tu navegador.")
-                  return
-                }
-
-                // Intentar obtener el provider
-                const provider = await requestProvider()
-                console.log('Provider obtenido:', provider)
-                
-                // Intentar habilitar el provider
-                await provider.enable()
-                console.log('WebLN habilitado correctamente')
-                setWebln(provider)
-                setWeblnError("")
-              } catch (enableError) {
-                console.error("Error al habilitar WebLN:", enableError)
-                handleWebLNError(enableError)
-              }
+              // Ya no intentamos habilitar automáticamente
+              setWeblnError("Haz clic en 'Donate Sats' para habilitar el pago directo con Alby")
             } else {
               attempts++
               if (attempts < maxAttempts) {
@@ -218,6 +198,22 @@ export default function WebLNBoostButton({
       setWeblnError("")
     }
   }, [isMobile, hideWebLNGuide])
+
+  const handleUserConsent = async () => {
+    try {
+      console.log('Iniciando habilitación de WebLN...')
+      const provider = await requestProvider()
+      console.log('Provider obtenido:', provider)
+      
+      await provider.enable()
+      console.log('WebLN habilitado correctamente')
+      setWebln(provider)
+      setWeblnError("")
+    } catch (error) {
+      console.error("Error al habilitar WebLN:", error)
+      handleWebLNError(error)
+    }
+  }
 
   const handleWebLNError = (error: unknown) => {
     setWebln(null)
@@ -506,7 +502,12 @@ export default function WebLNBoostButton({
             </div>
             <h2 className="text-4xl font-bold text-white">Bitflow</h2>
             <Button
-              onClick={() => setStep("amount")}
+              onClick={async () => {
+                if (!isMobile && !hideWebLNGuide) {
+                  await handleUserConsent()
+                }
+                setStep("amount")
+              }}
               className="bg-white hover:bg-white/90 font-bold text-lg px-8 py-3 rounded-full shadow-[0_8px_16px_rgba(0,0,0,0.15)] hover:shadow-[0_12px_24px_rgba(0,0,0,0.2)] transition-all duration-200"
               style={{ color: currentThemeColor }}
             >
