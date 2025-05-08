@@ -277,7 +277,7 @@ export default function WebLNBoostButton({
       }
 
       // Verificar si ya está habilitado
-      if ((provider as any)._isEnabled) {
+      if ((provider as WebLNProvider & { _isEnabled?: boolean })._isEnabled) {
         console.log('WebLN ya está habilitado')
         setWebln(provider)
         setWeblnError("")
