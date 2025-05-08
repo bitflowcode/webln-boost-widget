@@ -28,7 +28,7 @@ async function buildWidget() {
     // Crear el bundle
     const bundleCode = `
 // Asegurarnos de que las dependencias estén disponibles
-if (!window.React || !window.ReactDOM || !window.qrcode || !window.bech32) {
+if (!window.React || !window.ReactDOM || !window.bech32) {
   throw new Error('Dependencias no cargadas correctamente');
 }
 
@@ -36,7 +36,6 @@ if (!window.React || !window.ReactDOM || !window.qrcode || !window.bech32) {
 window.renderBitflowWidget = (container, config) => {
   const { useState, useEffect } = window.React;
   const { createRoot } = window.ReactDOM;
-  const { QRCodeSVG } = window.qrcode;
   const { bech32 } = window.bech32;
   
   ${result.code}

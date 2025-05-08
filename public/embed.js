@@ -19,16 +19,6 @@
     ]);
   }
 
-  // Cargar qrcode.react si no existe
-  if (!window.qrcode) {
-    await new Promise(resolve => {
-      const script = document.createElement('script');
-      script.src = 'https://unpkg.com/qrcode.react@4.2.0/umd/qrcode.react.min.js';
-      script.onload = resolve;
-      document.head.appendChild(script);
-    });
-  }
-
   // Cargar bech32 si no existe
   if (!window.bech32) {
     await new Promise(resolve => {
