@@ -11,7 +11,7 @@
         const script = document.createElement('script');
         script.type = 'text/javascript';
         script.src = src;
-        script.async = true;
+        script.async = false; // Cambiar a false para mantener el orden de carga
         script.crossOrigin = "anonymous";
         
         // Limpiar script en caso de error
@@ -22,7 +22,8 @@
 
         script.onload = () => {
           cleanup();
-          resolve();
+          // Esperar un momento después de cargar para asegurar que el script se ejecute
+          setTimeout(resolve, 100);
         };
 
         script.onerror = () => {
@@ -69,18 +70,46 @@
   };
 
   // Función para verificar si una variable global está disponible
-  const waitForGlobal = (name, maxAttempts = 20) => {
+  const waitForGlobal = (name, maxAttempts = 40) => { // Aumentar intentos y tiempo entre ellos
     return new Promise((resolve, reject) => {
       let attempts = 0;
-      const interval = setInterval(() => {
+      const check = () => {
         if (window[name]) {
-          clearInterval(interval);
           resolve(window[name]);
         } else if (++attempts >= maxAttempts) {
-          clearInterval(interval);
           reject(new Error(`Timeout esperando por ${name}`));
+        } else {
+          setTimeout(check, 250); // Aumentar el tiempo entre intentos
         }
-      }, 250);
+      };
+      check();
+    });
+  };
+
+  // Función para verificar que todas las dependencias estén cargadas
+  const verifyDependencies = () => {
+    return new Promise((resolve, reject) => {
+      const check = () => {
+        try {
+          if (!window.React || !window.ReactDOM) {
+            throw new Error('React o ReactDOM no están disponibles');
+          }
+          
+          const { useState, useEffect } = window.React;
+          const { createRoot } = window.ReactDOM;
+          
+          if (!useState || !useEffect || !createRoot) {
+            throw new Error('Funciones de React no están disponibles');
+          }
+          
+          resolve();
+        } catch (error) {
+          reject(error);
+        }
+      };
+      
+      // Intentar verificar inmediatamente
+      check();
     });
   };
 
@@ -99,24 +128,36 @@
         widget: 'https://www.bitflow.site/widget.bundle.js'
       };
 
-      // Cargar React si no está disponible
+      // Cargar React y esperar a que esté disponible
       if (!window.React) {
         console.log('Cargando React...');
         await loadScript(CDNS.react);
         await waitForGlobal('React');
+        console.log('React cargado correctamente');
       }
 
-      // Cargar ReactDOM si no está disponible
+      // Cargar ReactDOM y esperar a que esté disponible
       if (!window.ReactDOM) {
         console.log('Cargando ReactDOM...');
         await loadScript(CDNS.reactDom);
         await waitForGlobal('ReactDOM');
+        console.log('ReactDOM cargado correctamente');
       }
+
+      // Verificar que las dependencias estén correctamente cargadas
+      await verifyDependencies();
+      console.log('Dependencias verificadas correctamente');
 
       // Cargar el widget
       console.log('Cargando widget...');
       await loadScript(CDNS.widget);
       await waitForGlobal('WebLNBoostButton');
+      console.log('Widget cargado correctamente');
+
+      // Verificar que el widget se cargó correctamente
+      if (typeof window.WebLNBoostButton !== 'function') {
+        throw new Error('El widget no se cargó correctamente');
+      }
 
       // Inicializar todos los widgets en la página
       const widgets = document.querySelectorAll('[id^="bitflow-widget"]');
