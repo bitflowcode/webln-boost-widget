@@ -38,10 +38,11 @@ window.renderBitflowWidget = (container, config) => {
   const { createRoot } = window.ReactDOM;
   
   ${result.code}
+  window.WebLNBoostButton = WebLNBoostButton;
 
   // Renderizar el componente usando createRoot
   const root = createRoot(container);
-  root.render(React.createElement(WebLNBoostButton, config));
+  root.render(React.createElement(window.WebLNBoostButton, config));
 };`;
 
     // Guardar el bundle
