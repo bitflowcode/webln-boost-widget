@@ -141,6 +141,7 @@ export default function WebLNBoostButton({
   useEffect(() => {
     const initWebLN = async () => {
       try {
+        console.log('Iniciando initWebLN...')
         // Solo intentar WebLN en desktop y si no está oculta la guía
         if (!isMobile && !hideWebLNGuide) {
           console.log('Verificando disponibilidad de WebLN...')
@@ -149,29 +150,77 @@ export default function WebLNBoostButton({
           let attempts = 0
           const maxAttempts = 20
           const checkWebLN = async () => {
-            // Verificar si estamos en un iframe
-            const isInIframe = window !== window.parent
-            
-            // Verificar disponibilidad de WebLN
-            const hasWebLN = typeof window !== 'undefined' && (
-              'webln' in window || 
-              'alby' in window || 
-              (isInIframe && window.parent && ('webln' in window.parent || 'alby' in window.parent))
-            )
-            
-            if (hasWebLN) {
-              console.log('WebLN o Alby detectado')
-              // Ya no intentamos habilitar automáticamente
-              setWeblnError("Haz clic en 'Donate Sats' para habilitar el pago directo con Alby")
-            } else {
+            try {
+              // Verificar si estamos en iframe
+              const isInIframe = window !== window.parent
+              console.log('¿Estamos en iframe?', isInIframe)
+              
+              // Verificar disponibilidad de WebLN en el contexto actual
+              const currentContextHasWebLN = typeof window !== 'undefined' && (
+                (window.webln && typeof window.webln.enable === 'function') || 
+                (window.alby && typeof window.alby.enable === 'function')
+              )
+              
+              // Verificar disponibilidad de WebLN en el contexto padre si estamos en iframe
+              let parentContextHasWebLN = false
+              try {
+                if (isInIframe && window.parent) {
+                  parentContextHasWebLN = Boolean(
+                    (window.parent.webln && typeof window.parent.webln.enable === 'function') || 
+                    (window.parent.alby && typeof window.parent.alby.enable === 'function')
+                  )
+                }
+              } catch (e) {
+                console.log('Error al acceder al contexto padre:', e)
+              }
+              
+              console.log('WebLN en contexto actual:', currentContextHasWebLN)
+              console.log('WebLN en contexto padre:', parentContextHasWebLN)
+              
+              const hasWebLN = currentContextHasWebLN || parentContextHasWebLN
+              
+              if (hasWebLN) {
+                console.log('WebLN o Alby detectado')
+                // Intentar habilitar WebLN automáticamente
+                try {
+                  // Si estamos en iframe y el padre tiene WebLN, intentar usar ese
+                  let provider
+                  if (isInIframe && parentContextHasWebLN) {
+                    console.log('Intentando usar WebLN del contexto padre')
+                    provider = window.parent.webln || window.parent.alby
+                  } else {
+                    console.log('Intentando usar WebLN del contexto actual')
+                    provider = await requestProvider()
+                  }
+                  
+                  if (provider) {
+                    console.log('Provider obtenido:', provider)
+                    await provider.enable()
+                    console.log('WebLN habilitado automáticamente')
+                    setWebln(provider)
+                    setWeblnError("")
+                  }
+                } catch (enableError) {
+                  console.log('WebLN detectado pero requiere autorización manual:', enableError)
+                  setWeblnError("Haz clic en 'Donate Sats' para habilitar el pago directo con Alby")
+                }
+              } else {
+                attempts++
+                if (attempts < maxAttempts) {
+                  console.log(`Intento ${attempts} de ${maxAttempts}...`)
+                  const delay = Math.min(500 + (attempts * 100), 2000)
+                  setTimeout(checkWebLN, delay)
+                } else {
+                  console.log('WebLN no detectado después de múltiples intentos')
+                  setWeblnError("No se detectó una billetera compatible con WebLN")
+                }
+              }
+            } catch (error) {
+              console.error('Error en checkWebLN:', error)
               attempts++
               if (attempts < maxAttempts) {
-                console.log(`Intento ${attempts} de ${maxAttempts}...`)
                 const delay = Math.min(500 + (attempts * 100), 2000)
                 setTimeout(checkWebLN, delay)
-              } else {
-                console.log('WebLN no detectado después de múltiples intentos')
-                setWeblnError("No se detectó una billetera compatible con WebLN")
               }
             }
           }
@@ -202,8 +251,38 @@ export default function WebLNBoostButton({
   const handleUserConsent = async () => {
     try {
       console.log('Iniciando habilitación de WebLN...')
-      const provider = await requestProvider()
+      
+      // Verificar si estamos en iframe y el padre tiene WebLN
+      const isInIframe = window !== window.parent
+      console.log('¿Estamos en iframe? (handleUserConsent):', isInIframe)
+      
+      let provider
+      try {
+        if (isInIframe && window.parent && (window.parent.webln || window.parent.alby)) {
+          console.log('Usando WebLN del contexto padre')
+          provider = window.parent.webln || window.parent.alby
+        } else {
+          console.log('Obteniendo proveedor WebLN del contexto actual')
+          provider = await requestProvider()
+        }
+      } catch (error) {
+        console.error('Error al obtener el proveedor:', error)
+        throw error
+      }
+      
       console.log('Provider obtenido:', provider)
+      
+      if (!provider) {
+        throw new Error('No se pudo obtener el proveedor WebLN')
+      }
+
+      // Verificar si ya está habilitado
+      if ((provider as any)._isEnabled) {
+        console.log('WebLN ya está habilitado')
+        setWebln(provider)
+        setWeblnError("")
+        return
+      }
       
       await provider.enable()
       console.log('WebLN habilitado correctamente')

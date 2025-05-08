@@ -95,13 +95,19 @@ export default function CreatePage() {
     })
 
     // Código del iframe
-    const iframeCode = `<iframe 
-  src="https://www.bitflow.site/widget-params?${params.toString()}"
-  style="width: 460px; height: 460px; border: none; background: transparent;"
-  allowtransparency="true"
-></iframe>`
+    const scriptEmbedCode = `<div id="bitflow-widget"
+      data-receiver-type="${config.receiverType}"
+      data-receiver="${config.receiver}"
+      data-amounts="${config.amounts}"
+      data-labels="${config.labels}"
+      data-theme="${config.theme}"
+      ${config.avatarSeed ? `data-avatar-seed="${config.avatarSeed}"` : ''}
+      ${config.avatarSet ? `data-avatar-set="${config.avatarSet}"` : ''}
+      ${config.image ? `data-image="${config.image}"` : ''}
+    ></div>
+    <script src="https://www.bitflow.site/embed.js"></script>`;
 
-    setWidgetCode(iframeCode)
+    setWidgetCode(scriptEmbedCode)
 
     // Codificar para la URL compartible
     const jsonString = JSON.stringify(widgetConfig)
