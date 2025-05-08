@@ -6,13 +6,13 @@
     await Promise.all([
       new Promise(resolve => {
         const script = document.createElement('script');
-        script.src = 'https://unpkg.com/react@19/umd/react.production.min.js';
+        script.src = 'https://unpkg.com/react@18/umd/react.production.min.js';
         script.onload = resolve;
         document.head.appendChild(script);
       }),
       new Promise(resolve => {
         const script = document.createElement('script');
-        script.src = 'https://unpkg.com/react-dom@19/umd/react-dom.production.min.js';
+        script.src = 'https://unpkg.com/react-dom@18/umd/react-dom.production.min.js';
         script.onload = resolve;
         document.head.appendChild(script);
       })
