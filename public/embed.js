@@ -19,16 +19,6 @@
     ]);
   }
 
-  // Cargar bech32 si no existe
-  if (!window.bech32) {
-    await new Promise(resolve => {
-      const script = document.createElement('script');
-      script.src = 'https://unpkg.com/bech32@2.0.0/index.umd.js';
-      script.onload = resolve;
-      document.head.appendChild(script);
-    });
-  }
-
   // Cargar el componente del widget (bundle UMD exportado)
   if (!window.WebLNBoostButton) {
     await new Promise(resolve => {
