@@ -16,34 +16,60 @@ async function buildWidget() {
       minify: true,
       define: {
         'process.env.NODE_ENV': '"production"'
-      },
-      banner: `
-        var process = { env: { NODE_ENV: 'production' } };
-        var require = undefined;
-        var module = undefined;
-        var exports = undefined;
-      `
+      }
     });
 
-    // Crear el bundle
+    // Crear el bundle con manejo mejorado de dependencias
     const bundleCode = `
-// Asegurarnos de que las dependencias estén disponibles
-if (!window.React || !window.ReactDOM) {
-  throw new Error('Dependencias no cargadas correctamente');
-}
-
 // Función global para renderizar el widget
-window.renderBitflowWidget = (container, config) => {
-  const { useState, useEffect } = window.React;
-  const { createRoot } = window.ReactDOM;
-  
-  ${result.code}
-  window.WebLNBoostButton = WebLNBoostButton;
+(function() {
+  // Configuración del entorno
+  var process = { env: { NODE_ENV: 'production' } };
+  var require = undefined;
+  var module = undefined;
+  var exports = undefined;
 
-  // Renderizar el componente usando createRoot
-  const root = createRoot(container);
-  root.render(React.createElement(window.WebLNBoostButton, config));
-};`;
+  // Función para verificar dependencias
+  function checkDependencies() {
+    if (!window.React || !window.ReactDOM) {
+      console.error('Dependencias faltantes:', {
+        'React': !!window.React,
+        'ReactDOM': !!window.ReactDOM
+      });
+      throw new Error('Dependencias no cargadas correctamente');
+    }
+
+    const { useState, useEffect } = window.React;
+    const { createRoot } = window.ReactDOM;
+
+    if (!useState || !useEffect || !createRoot) {
+      console.error('Funciones de React/ReactDOM faltantes:', {
+        'useState': !!useState,
+        'useEffect': !!useEffect,
+        'createRoot': !!createRoot
+      });
+      throw new Error('Las funciones de React no están disponibles');
+    }
+  }
+
+  // Código del componente
+  ${result.code}
+
+  // Exportar el componente y la función de renderizado
+  try {
+    checkDependencies();
+    window.WebLNBoostButton = WebLNBoostButton;
+    
+    // Función de renderizado global
+    window.renderBitflowWidget = function(container, config) {
+      const root = window.ReactDOM.createRoot(container);
+      root.render(window.React.createElement(window.WebLNBoostButton, config));
+    };
+  } catch (error) {
+    console.error('Error al inicializar el componente:', error);
+    throw error;
+  }
+})();`;
 
     // Guardar el bundle
     const bundlePath = path.join(__dirname, '../public/widget.bundle.js');
