@@ -263,6 +263,7 @@
     const loaderScript = document.createElement('script');
     loaderScript.src = 'https://www.bitflow.site/widget-loader.js';
     loaderScript.async = true;
+    loaderScript.crossOrigin = 'anonymous'; // Agregar crossOrigin para mejor manejo CORS
     document.head.appendChild(loaderScript);
   }
 

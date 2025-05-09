@@ -7,7 +7,8 @@ window.BitflowWidget = window.BitflowWidget || {
     cdnBase: 'https://www.bitflow.site',
     dependencies: {
       react: 'https://unpkg.com/react@18.2.0/umd/react.production.min.js',
-      reactDom: 'https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js'
+      reactDom: 'https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js',
+      widget: 'https://www.bitflow.site/widget.bundle.js'
     },
     retryConfig: {
       maxRetries: 3,
@@ -109,10 +110,9 @@ class WidgetLoader {
   }
 
   async loadWidget() {
-    const { cdnBase, retryConfig } = this.config;
-    const widgetUrl = `${cdnBase}/widget.bundle.js`;
+    const { dependencies, retryConfig } = this.config;
     
-    await loadScript(widgetUrl, retryConfig);
+    await loadScript(dependencies.widget, retryConfig);
     await waitForGlobal('WebLNBoostButton', retryConfig.timeout);
   }
 
