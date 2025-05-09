@@ -61,15 +61,14 @@ async function buildWidget() {
   }
 
   // Código del componente
-  ${result.code}
-
-  // Exportar el componente y la función de renderizado
   try {
-    // Verificar dependencias antes de exportar
+    // Primero exportar el componente
+    ${result.code}
+    window.WebLNBoostButton = WebLNBoostButton;
+    console.log('Componente WebLNBoostButton exportado');
+
+    // Luego verificar dependencias y configurar el renderizado
     if (checkDependencies()) {
-      // Exportar el componente
-      window.WebLNBoostButton = WebLNBoostButton;
-      
       // Función de renderizado global con manejo de errores mejorado
       window.renderBitflowWidget = function(container, config) {
         try {
