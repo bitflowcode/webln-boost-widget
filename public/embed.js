@@ -4,6 +4,9 @@
   // Crear un namespace aislado para el widget
   window.BitflowWidget = window.BitflowWidget || {};
   
+  const MAX_RETRIES = 3;
+  const RETRY_DELAY = 1000;
+
   // Función para cargar un script con reintentos y fallback
   const loadScript = (src, retries = 3) => {
     return new Promise((resolve, reject) => {
@@ -113,11 +116,37 @@
     });
   };
 
+  const loadScriptWithRetry = async (src, retries = MAX_RETRIES) => {
+    try {
+      await loadScript(src);
+    } catch (error) {
+      if (retries > 0) {
+        console.log(`Error cargando script ${src}, reintentando... (${retries} intentos restantes)`);
+        await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
+        return loadScriptWithRetry(src, retries - 1);
+      }
+      throw error;
+    }
+  };
+
+  const waitForDependenciesWithTimeout = async (timeout = 10000) => {
+    const start = Date.now();
+    
+    while (Date.now() - start < timeout) {
+      if (window.React && window.ReactDOM && window.WebLNBoostButton) {
+        return true;
+      }
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    
+    throw new Error('Timeout esperando dependencias');
+  };
+
   // Función principal de inicialización
   const init = async () => {
     try {
       // Verificar si ya está inicializado
-      if (window.BitflowWidget.initialized) {
+      if (window.BitflowWidget && window.BitflowWidget.initialized) {
         console.log('Widget ya inicializado');
         return;
       }
@@ -128,72 +157,93 @@
         widget: 'https://www.bitflow.site/widget.bundle.js'
       };
 
-      // Cargar React y esperar a que esté disponible
-      if (!window.React) {
-        console.log('Cargando React...');
-        await loadScript(CDNS.react);
-        await waitForGlobal('React');
-        console.log('React cargado correctamente');
+      // Inicializar namespace global
+      window.BitflowWidget = window.BitflowWidget || {
+        initialized: false,
+        loadingPromise: null
+      };
+
+      // Si ya hay una carga en progreso, esperar a que termine
+      if (window.BitflowWidget.loadingPromise) {
+        await window.BitflowWidget.loadingPromise;
+        return;
       }
 
-      // Cargar ReactDOM y esperar a que esté disponible
-      if (!window.ReactDOM) {
-        console.log('Cargando ReactDOM...');
-        await loadScript(CDNS.reactDom);
-        await waitForGlobal('ReactDOM');
-        console.log('ReactDOM cargado correctamente');
-      }
-
-      // Verificar que las dependencias estén correctamente cargadas
-      await verifyDependencies();
-      console.log('Dependencias verificadas correctamente');
-
-      // Cargar el widget
-      console.log('Cargando widget...');
-      await loadScript(CDNS.widget);
-      await waitForGlobal('WebLNBoostButton');
-      console.log('Widget cargado correctamente');
-
-      // Verificar que el widget se cargó correctamente
-      if (typeof window.WebLNBoostButton !== 'function') {
-        throw new Error('El widget no se cargó correctamente');
-      }
-
-      // Inicializar todos los widgets en la página
-      const widgets = document.querySelectorAll('[id^="bitflow-widget"]');
-      widgets.forEach((target, index) => {
+      // Crear promesa de carga
+      window.BitflowWidget.loadingPromise = (async () => {
         try {
-          if (!target.dataset.initialized) {
-            const props = {
-              receiverType: target.getAttribute('data-receiver-type') || 'lightning',
-              receiver: target.getAttribute('data-receiver'),
-              amounts: (target.getAttribute('data-amounts') || '21,100,1000').split(',').map(Number),
-              labels: (target.getAttribute('data-labels') || 'Café,Propina,Boost').split(','),
-              theme: target.getAttribute('data-theme') || 'orange',
-              avatarSeed: target.getAttribute('data-avatar-seed'),
-              avatarSet: target.getAttribute('data-avatar-set'),
-              image: target.getAttribute('data-image'),
-              hideWebLNGuide: true
-            };
-
-            if (!props.receiver) {
-              throw new Error('Receptor no especificado');
-            }
-
-            window.renderBitflowWidget(target, props);
-            target.dataset.initialized = 'true';
-            console.log(`Widget ${index + 1} inicializado correctamente`);
+          // Cargar React si no está disponible
+          if (!window.React) {
+            console.log('Cargando React...');
+            await loadScriptWithRetry(CDNS.react);
+            await waitForGlobal('React');
+            console.log('React cargado correctamente');
           }
-        } catch (error) {
-          console.error(`Error al inicializar widget ${index + 1}:`, error);
-          target.innerHTML = `<div style="color: red; padding: 20px; text-align: center; border: 1px solid red; border-radius: 8px; margin: 10px;">
-            Error al cargar el widget: ${error.message}
-          </div>`;
-        }
-      });
 
-      window.BitflowWidget.initialized = true;
-      console.log('Inicialización completada');
+          // Cargar ReactDOM si no está disponible
+          if (!window.ReactDOM) {
+            console.log('Cargando ReactDOM...');
+            await loadScriptWithRetry(CDNS.reactDom);
+            await waitForGlobal('ReactDOM');
+            console.log('ReactDOM cargado correctamente');
+          }
+
+          // Cargar el widget
+          console.log('Cargando widget...');
+          await loadScriptWithRetry(CDNS.widget);
+          
+          // Esperar a que todas las dependencias estén disponibles
+          await waitForDependenciesWithTimeout();
+          console.log('Todas las dependencias cargadas correctamente');
+
+          // Inicializar todos los widgets en la página
+          const widgets = document.querySelectorAll('[id^="bitflow-widget"]');
+          widgets.forEach((target, index) => {
+            try {
+              if (!target.dataset.initialized) {
+                const props = {
+                  receiverType: target.getAttribute('data-receiver-type') || 'lightning',
+                  receiver: target.getAttribute('data-receiver'),
+                  amounts: (target.getAttribute('data-amounts') || '21,100,1000').split(',').map(Number),
+                  labels: (target.getAttribute('data-labels') || 'Café,Propina,Boost').split(','),
+                  theme: target.getAttribute('data-theme') || 'orange',
+                  avatarSeed: target.getAttribute('data-avatar-seed'),
+                  avatarSet: target.getAttribute('data-avatar-set'),
+                  image: target.getAttribute('data-image'),
+                  hideWebLNGuide: true
+                };
+
+                if (!props.receiver) {
+                  throw new Error('Receptor no especificado');
+                }
+
+                window.renderBitflowWidget(target, props);
+                target.dataset.initialized = 'true';
+                console.log(`Widget ${index + 1} inicializado correctamente`);
+              }
+            } catch (error) {
+              console.error(`Error al inicializar widget ${index + 1}:`, error);
+              target.innerHTML = `<div style="color: red; padding: 20px; text-align: center; border: 1px solid red; border-radius: 8px; margin: 10px;">
+                Error al cargar el widget: ${error.message}
+              </div>`;
+            }
+          });
+
+          window.BitflowWidget.initialized = true;
+          console.log('Inicialización completada');
+
+        } catch (error) {
+          console.error('Error durante la inicialización:', error);
+          const widgets = document.querySelectorAll('[id^="bitflow-widget"]');
+          widgets.forEach(target => {
+            if (!target.dataset.initialized) {
+              target.innerHTML = `<div style="color: red; padding: 20px; text-align: center; border: 1px solid red; border-radius: 8px; margin: 10px;">
+                Error al cargar el widget: ${error.message}
+              </div>`;
+            }
+          });
+        }
+      })();
 
     } catch (error) {
       console.error('Error durante la inicialización:', error);
@@ -208,10 +258,60 @@
     }
   };
 
+  // Cargar el loader si no está presente
+  if (!window.BitflowWidget || !window.BitflowWidget.loader) {
+    const loaderScript = document.createElement('script');
+    loaderScript.src = 'https://www.bitflow.site/widget-loader.js';
+    loaderScript.async = true;
+    document.head.appendChild(loaderScript);
+  }
+
+  // Función para inicializar el widget cuando el loader esté disponible
+  const initializeWithLoader = async () => {
+    try {
+      // Esperar a que el loader esté disponible
+      let attempts = 0;
+      const maxAttempts = 10;
+      
+      while (!window.BitflowWidget?.loader && attempts < maxAttempts) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+        attempts++;
+      }
+      
+      if (!window.BitflowWidget?.loader) {
+        throw new Error('No se pudo cargar el widget loader');
+      }
+      
+      // El loader se encargará de inicializar los widgets
+      await window.BitflowWidget.loader.initialize();
+      
+    } catch (error) {
+      console.error('Error al inicializar el widget:', error);
+      const widgets = document.querySelectorAll('[id^="bitflow-widget"]');
+      widgets.forEach(target => {
+        if (!target.dataset.initialized) {
+          target.innerHTML = `
+            <div style="
+              color: red;
+              padding: 20px;
+              text-align: center;
+              border: 1px solid red;
+              border-radius: 8px;
+              margin: 10px;
+              font-family: system-ui, -apple-system, sans-serif;
+            ">
+              Error al cargar el widget: ${error.message}
+            </div>
+          `;
+        }
+      });
+    }
+  };
+
   // Iniciar cuando el DOM esté listo
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener('DOMContentLoaded', initializeWithLoader);
   } else {
-    init();
+    initializeWithLoader();
   }
 })();

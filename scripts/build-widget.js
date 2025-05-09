@@ -32,43 +32,41 @@ async function buildWidget() {
   var module = undefined;
   var exports = undefined;
 
-  // Función para verificar dependencias
-  function checkDependencies() {
-    try {
-      // Verificar React
-      if (typeof window.React === 'undefined') {
-        throw new Error('React no está disponible');
+  // Esperar a que las dependencias estén disponibles
+  function waitForDependencies(callback) {
+    const interval = setInterval(() => {
+      try {
+        if (window.React && window.ReactDOM) {
+          const { useState, useEffect } = window.React;
+          const { createRoot } = window.ReactDOM;
+          
+          if (useState && useEffect && createRoot) {
+            clearInterval(interval);
+            callback();
+          }
+        }
+      } catch (error) {
+        // Ignorar errores durante la espera
       }
+    }, 100);
 
-      // Verificar ReactDOM
-      if (typeof window.ReactDOM === 'undefined') {
-        throw new Error('ReactDOM no está disponible');
-      }
-
-      // Verificar funciones específicas de React
-      const { useState, useEffect } = window.React;
-      const { createRoot } = window.ReactDOM;
-
-      if (!useState || !useEffect || !createRoot) {
-        throw new Error('Las funciones de React no están disponibles');
-      }
-
-      return true;
-    } catch (error) {
-      console.error('Error en verificación de dependencias:', error);
-      throw error;
-    }
+    // Timeout después de 10 segundos
+    setTimeout(() => {
+      clearInterval(interval);
+      console.error('Timeout esperando dependencias');
+    }, 10000);
   }
 
   // Código del componente
-  try {
-    // Primero exportar el componente
-    ${result.code}
-    window.WebLNBoostButton = WebLNBoostButton;
-    console.log('Componente WebLNBoostButton exportado');
+  ${result.code}
 
-    // Luego verificar dependencias y configurar el renderizado
-    if (checkDependencies()) {
+  // Exportar el componente inmediatamente
+  window.WebLNBoostButton = WebLNBoostButton;
+  console.log('Componente WebLNBoostButton exportado');
+
+  // Configurar el renderizado cuando las dependencias estén listas
+  waitForDependencies(() => {
+    try {
       // Función de renderizado global con manejo de errores mejorado
       window.renderBitflowWidget = function(container, config) {
         try {
@@ -129,12 +127,33 @@ async function buildWidget() {
       // Marcar como inicializado
       window.BitflowWidget.widgetLoaded = true;
       console.log('Widget inicializado correctamente');
+
+      // Inicializar widgets existentes
+      document.querySelectorAll('[id^="bitflow-widget"]').forEach((target) => {
+        if (!target.dataset.initialized) {
+          const props = {
+            receiverType: target.getAttribute('data-receiver-type') || 'lightning',
+            receiver: target.getAttribute('data-receiver'),
+            amounts: (target.getAttribute('data-amounts') || '21,100,1000').split(',').map(Number),
+            labels: (target.getAttribute('data-labels') || 'Café,Propina,Boost').split(','),
+            theme: target.getAttribute('data-theme') || 'orange',
+            avatarSeed: target.getAttribute('data-avatar-seed'),
+            avatarSet: target.getAttribute('data-avatar-set'),
+            image: target.getAttribute('data-image'),
+            hideWebLNGuide: true
+          };
+
+          if (props.receiver) {
+            window.renderBitflowWidget(target, props);
+            target.dataset.initialized = 'true';
+          }
+        }
+      });
+    } catch (error) {
+      console.error('Error al inicializar el widget:', error);
+      window.BitflowWidget.error = error;
     }
-  } catch (error) {
-    console.error('Error al inicializar el componente:', error);
-    window.BitflowWidget.error = error;
-    throw error;
-  }
+  });
 })();`;
 
     // Guardar el bundle
