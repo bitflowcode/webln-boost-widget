@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "build:widget-bundle": "node scripts/build-widget.js",
-    "build:widget": "npm run build:widget-bundle && next build && cp public/widget.bundle.js .next/static/widget.bundle.js"
+    "build:widget": "npm run build:widget-bundle && next build && cp public/widget.js .next/static/widget.js && cp public/widget.css .next/static/widget.css && cp public/widget.bundle.js .next/static/widget.bundle.js"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.1.2",
