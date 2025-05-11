@@ -27,7 +27,6 @@ export default function Home() {
             labels={['Café', 'Propina', 'Boost']}
             image="/assets/images/bitflow-avatar.png"
             theme="orange"
-            hideWebLNGuide={true}
           />
           
           <InfoTooltip />
