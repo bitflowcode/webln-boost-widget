@@ -293,6 +293,7 @@ export default function CreatePage() {
           {/* Vista Previa */}
           <div className="mt-12">
             <h2 className="text-2xl font-bold mb-6 text-white">Vista Previa</h2>
+            {/* Forzar nuevo build - 2024-05-12 */}
             <div className="flex justify-center">
               <WebLNBoostButton
                 receiverType={config.receiverType}
