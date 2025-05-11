@@ -35,7 +35,6 @@ interface WebLNBoostButtonProps {
   avatarSeed?: string
   avatarSet?: 'set1' | 'set2' | 'set3' | 'set4' | 'set5'
   image?: string // Para mantener soporte de imagen personalizada
-  hideWebLNGuide?: boolean // Para ocultar la guía de WebLN
 }
 
 type Step = "initial" | "amount" | "note" | "qr" | "processing"
@@ -77,6 +76,37 @@ const getLabel = (labels: string[] | { amount: string, note: string, submit: str
   return ''
 }
 
+const MAX_WEBLN_RETRIES = 5;
+const WEBLN_RETRY_DELAY = 1000;
+
+const waitForWebLN = async (timeout = 10000) => {
+  const start = Date.now();
+  let attempts = 0;
+  
+  while (Date.now() - start < timeout && attempts < MAX_WEBLN_RETRIES) {
+    try {
+      // Verificar disponibilidad de WebLN en el contexto actual
+      const hasWebLN = typeof window !== 'undefined' && (
+        (window.webln && typeof window.webln.enable === 'function') || 
+        (window.alby && typeof window.alby.enable === 'function')
+      );
+      
+      if (hasWebLN) {
+        return true;
+      }
+      
+      attempts++;
+      await new Promise(resolve => setTimeout(resolve, WEBLN_RETRY_DELAY));
+    } catch (error) {
+      console.error('Error al verificar WebLN:', error);
+      attempts++;
+      await new Promise(resolve => setTimeout(resolve, WEBLN_RETRY_DELAY));
+    }
+  }
+  
+  return false;
+};
+
 export default function WebLNBoostButton({
   receiverType = 'lightning',
   receiver = RECIPIENT_ADDRESS,
@@ -87,8 +117,7 @@ export default function WebLNBoostButton({
   incrementValue = 10,
   avatarSeed,
   avatarSet = 'set1',
-  image,
-  hideWebLNGuide = false
+  image
 }: WebLNBoostButtonProps) {
   const [step, setStep] = useState<Step>("initial")
   const [amount, setAmount] = useState<number>(0)
@@ -128,147 +157,69 @@ export default function WebLNBoostButton({
     const checkMobile = () => {
       const mobile = /iPhone|iPad|Android/i.test(navigator.userAgent)
       setIsMobile(mobile)
-      if (mobile || hideWebLNGuide) {
-        setWeblnError("") // No mostrar error de WebLN en móvil o si hideWebLNGuide es true
-      }
     }
     
     checkMobile()
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)
-  }, [hideWebLNGuide])
+  }, [])
 
   useEffect(() => {
     const initWebLN = async () => {
       try {
-        console.log('Iniciando initWebLN...')
-        // Solo intentar WebLN en desktop y si no está oculta la guía
-        if (!isMobile && !hideWebLNGuide) {
-          console.log('Verificando disponibilidad de WebLN...')
+        console.log('Iniciando initWebLN...');
+        
+        // Solo intentar WebLN en desktop
+        if (!isMobile) {
+          console.log('Verificando disponibilidad de WebLN...');
           
-          // Esperar a que webln esté disponible
-          let attempts = 0
-          const maxAttempts = 20
-          const checkWebLN = async () => {
+          const hasWebLN = await waitForWebLN();
+            
+          if (hasWebLN) {
+            console.log('WebLN detectado, intentando habilitar...');
             try {
-              // Verificar si estamos en iframe
-              const isInIframe = window !== window.parent
-              console.log('¿Estamos en iframe?', isInIframe)
+              const provider = await requestProvider();
               
-              // Verificar disponibilidad de WebLN en el contexto actual
-              const currentContextHasWebLN = typeof window !== 'undefined' && (
-                (window.webln && typeof window.webln.enable === 'function') || 
-                (window.alby && typeof window.alby.enable === 'function')
-              )
-              
-              // Verificar disponibilidad de WebLN en el contexto padre si estamos en iframe
-              let parentContextHasWebLN = false
-              try {
-                if (isInIframe && window.parent) {
-                  parentContextHasWebLN = Boolean(
-                    (window.parent.webln && typeof window.parent.webln.enable === 'function') || 
-                    (window.parent.alby && typeof window.parent.alby.enable === 'function')
-                  )
-                }
-              } catch (e) {
-                console.log('Error al acceder al contexto padre:', e)
+              if (provider) {
+                await provider.enable();
+                console.log('WebLN habilitado correctamente');
+                setWebln(provider);
+                setWeblnError("");
               }
-              
-              console.log('WebLN en contexto actual:', currentContextHasWebLN)
-              console.log('WebLN en contexto padre:', parentContextHasWebLN)
-              
-              const hasWebLN = currentContextHasWebLN || parentContextHasWebLN
-              
-              if (hasWebLN) {
-                console.log('WebLN o Alby detectado')
-                // Intentar habilitar WebLN automáticamente
-                try {
-                  // Si estamos en iframe y el padre tiene WebLN, intentar usar ese
-                  let provider
-                  if (isInIframe && parentContextHasWebLN) {
-                    console.log('Intentando usar WebLN del contexto padre')
-                    provider = window.parent.webln || window.parent.alby
-                  } else {
-                    console.log('Intentando usar WebLN del contexto actual')
-                    provider = await requestProvider()
-                  }
-                  
-                  if (provider) {
-                    console.log('Provider obtenido:', provider)
-                    await provider.enable()
-                    console.log('WebLN habilitado automáticamente')
-                    setWebln(provider)
-                    setWeblnError("")
-                  }
-                } catch (enableError) {
-                  console.log('WebLN detectado pero requiere autorización manual:', enableError)
-                  setWeblnError("Haz clic en 'Donate Sats' para habilitar el pago directo con Alby")
-                }
-              } else {
-                attempts++
-                if (attempts < maxAttempts) {
-                  console.log(`Intento ${attempts} de ${maxAttempts}...`)
-                  const delay = Math.min(500 + (attempts * 100), 2000)
-                  setTimeout(checkWebLN, delay)
-                } else {
-                  console.log('WebLN no detectado después de múltiples intentos')
-                  setWeblnError("No se detectó una billetera compatible con WebLN")
-                }
-              }
-            } catch (error) {
-              console.error('Error en checkWebLN:', error)
-              attempts++
-              if (attempts < maxAttempts) {
-                const delay = Math.min(500 + (attempts * 100), 2000)
-                setTimeout(checkWebLN, delay)
-              }
+            } catch (enableError) {
+              console.log('Error al habilitar WebLN:', enableError);
+              setWeblnError("Haz clic en 'Donate Sats' para habilitar el pago directo con Alby");
             }
+          } else {
+            console.log('WebLN no detectado después de múltiples intentos');
+            setWeblnError("No se detectó una billetera compatible con WebLN");
           }
-          
-          // Iniciar la verificación después de un breve retraso inicial
-          setTimeout(checkWebLN, 1000)
         }
-      } catch (initError) {
-        console.error("Error al inicializar WebLN:", initError)
-        handleWebLNError(initError)
+      } catch (error) {
+        console.error('Error al inicializar WebLN:', error);
+        handleWebLNError(error);
       }
-    }
+    };
 
     // Limpiar estado al montar
-    setWebln(null)
-    setWeblnError("")
+    setWebln(null);
+    setWeblnError("");
     
     // Iniciar la detección
-    initWebLN()
+    initWebLN();
     
     // Cleanup
     return () => {
-      setWebln(null)
-      setWeblnError("")
-    }
-  }, [isMobile, hideWebLNGuide])
+      setWebln(null);
+      setWeblnError("");
+    };
+  }, [isMobile]);
 
   const handleUserConsent = async () => {
     try {
       console.log('Iniciando habilitación de WebLN...')
       
-      // Verificar si estamos en iframe y el padre tiene WebLN
-      const isInIframe = window !== window.parent
-      console.log('¿Estamos en iframe? (handleUserConsent):', isInIframe)
-      
-      let provider
-      try {
-        if (isInIframe && window.parent && (window.parent.webln || window.parent.alby)) {
-          console.log('Usando WebLN del contexto padre')
-          provider = window.parent.webln || window.parent.alby
-        } else {
-          console.log('Obteniendo proveedor WebLN del contexto actual')
-          provider = await requestProvider()
-        }
-      } catch (error) {
-        console.error('Error al obtener el proveedor:', error)
-        throw error
-      }
+      const provider = await requestProvider()
       
       console.log('Provider obtenido:', provider)
       
@@ -277,7 +228,7 @@ export default function WebLNBoostButton({
       }
 
       // Verificar si ya está habilitado
-      if ((provider as any)._isEnabled) {
+      if ((provider as WebLNProvider & { _isEnabled?: boolean })._isEnabled) {
         console.log('WebLN ya está habilitado')
         setWebln(provider)
         setWeblnError("")
@@ -296,7 +247,7 @@ export default function WebLNBoostButton({
 
   const handleWebLNError = (error: unknown) => {
     setWebln(null)
-    if (!isMobile && !hideWebLNGuide) {
+    if (!isMobile) {
       if (error instanceof Error) {
         if (error.message?.toLowerCase().includes('not authorized') || 
             error.message?.toLowerCase().includes('permission denied')) {
@@ -582,9 +533,7 @@ export default function WebLNBoostButton({
             <h2 className="text-4xl font-bold text-white">Bitflow</h2>
             <Button
               onClick={async () => {
-                if (!isMobile && !hideWebLNGuide) {
-                  await handleUserConsent()
-                }
+                await handleUserConsent()
                 setStep("amount")
               }}
               className="bg-white hover:bg-white/90 font-bold text-lg px-8 py-3 rounded-full shadow-[0_8px_16px_rgba(0,0,0,0.15)] hover:shadow-[0_12px_24px_rgba(0,0,0,0.2)] transition-all duration-200"
@@ -745,7 +694,7 @@ export default function WebLNBoostButton({
         >
           {renderStep()}
         </div>
-        {weblnError && !hideWebLNGuide && (
+        {weblnError && (
           <div className="absolute -bottom-2 left-0 right-0 transform translate-y-full pt-2 z-10 flex justify-center bg-transparent">
             <div className="p-0 bg-transparent">
               <WidgetInfoTooltip />
