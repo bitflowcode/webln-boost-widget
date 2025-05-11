@@ -37,7 +37,7 @@ export default async function WidgetParamsPage({ searchParams }: PageProps) {
       <WidgetStyles />
       <div className="flex items-center justify-center min-h-screen">
         <WebLNBoostButton
-          receiverType={receiverType}
+          receiverType={receiverType as 'lightning' | 'lnurl' | 'node'}
           receiver={receiver}
           amounts={amounts.split(',').map(Number)}
           labels={labels.split(',')}
@@ -45,7 +45,6 @@ export default async function WidgetParamsPage({ searchParams }: PageProps) {
           image={useCustomImage === 'true' ? image : undefined}
           avatarSeed={useCustomImage !== 'true' ? avatarSeed : undefined}
           avatarSet={useCustomImage !== 'true' ? avatarSet : undefined}
-          hideWebLNGuide={true}
         />
       </div>
     </div>
