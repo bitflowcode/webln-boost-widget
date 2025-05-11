@@ -111,7 +111,6 @@ export default function WidgetClient({ id }: WidgetClientProps) {
         image={config.useCustomImage ? config.image : undefined}
         avatarSeed={!config.useCustomImage ? config.avatarSeed : undefined}
         avatarSet={!config.useCustomImage ? config.avatarSet : undefined}
-        hideWebLNGuide={true}
       />
     </div>
   )

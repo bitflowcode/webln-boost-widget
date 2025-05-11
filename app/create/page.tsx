@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import WebLNBoostButton from '@/app/components/webln-boost-button'
 import Link from 'next/link'
 
@@ -47,32 +47,7 @@ export default function CreatePage() {
     }))
   }, [])
 
-  useEffect(() => {
-    if (isClient) {
-      // Generar código del widget
-      generateWidgetCode()
-    }
-  }, [config, isClient])
-
-  const handleConfigChange = (field: keyof WidgetConfig, value: string | boolean) => {
-    setConfig(prev => ({
-      ...prev,
-      [field]: value
-    }))
-  }
-
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text)
-      .then(() => {
-        // Aquí podrías añadir alguna notificación de éxito
-        console.log('Copiado al portapapeles')
-      })
-      .catch(err => {
-        console.error('Error al copiar:', err)
-      })
-  }
-
-  const generateWidgetCode = () => {
+  const generateWidgetCode = useCallback(() => {
     const widgetConfig = {
       receiverType: config.receiverType,
       receiver: config.receiver,
@@ -98,7 +73,7 @@ export default function CreatePage() {
     const jsonString = JSON.stringify(widgetConfig)
     
     // Codificar URLs en el JSON antes de codificar todo
-    const encodedJson = jsonString.replace(/(https?:\/\/[^"]+)/g, (url) => {
+    const encodedJson = jsonString.replace(/(https?:\/\/[^"']+)/g, (url) => {
       const base64url = btoa(url)
         .replace(/\+/g, '-')
         .replace(/\//g, '_')
@@ -113,15 +88,35 @@ export default function CreatePage() {
       .replace(/=+$/, '')
     
     // Generar código del iframe
-    const iframeCode = `<iframe
-  src="https://www.bitflow.site/widget/${base64Config}"
-  style="width:460px; height:420px; border:none; border-radius:16px; overflow:hidden;"
-  allow="clipboard-write"
-  loading="lazy"
-></iframe>`;
+    const iframeCode = `<iframe\n  src=\"https://www.bitflow.site/widget/${base64Config}\"\n  style=\"width:460px; height:420px; border:none; border-radius:16px; overflow:hidden;\"\n  allow=\"clipboard-write\"\n  loading=\"lazy\"\n></iframe>`;
 
     setWidgetCode(iframeCode)
     setShareUrl(`https://www.bitflow.site/widget/${base64Config}`)
+  }, [config])
+
+  useEffect(() => {
+    if (isClient) {
+      // Generar código del widget
+      generateWidgetCode()
+    }
+  }, [config, isClient, generateWidgetCode])
+
+  const handleConfigChange = (field: keyof WidgetConfig, value: string | boolean) => {
+    setConfig(prev => ({
+      ...prev,
+      [field]: value
+    }))
+  }
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text)
+      .then(() => {
+        // Aquí podrías añadir alguna notificación de éxito
+        console.log('Copiado al portapapeles')
+      })
+      .catch(err => {
+        console.error('Error al copiar:', err)
+      })
   }
 
   // No renderizar el widget durante SSR

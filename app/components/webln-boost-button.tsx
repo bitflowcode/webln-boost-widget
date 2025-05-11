@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { requestProvider, type WebLNProvider } from "webln"
 import { Button } from "@/app/components/ui/button"
 import { QRCodeSVG } from "qrcode.react"
@@ -164,22 +164,38 @@ export default function WebLNBoostButton({
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
+  const handleWebLNError = useCallback((error: unknown) => {
+    setWebln(null)
+    if (!isMobile) {
+      if (error instanceof Error) {
+        if (error.message?.toLowerCase().includes('not authorized') || 
+            error.message?.toLowerCase().includes('permission denied')) {
+          setWeblnError("Este sitio necesita autorización en Alby. Por favor, autoriza el sitio en la extensión y recarga la página.")
+        } else if (error.message?.toLowerCase().includes('no provider available')) {
+          setWeblnError("No se detectó una billetera compatible con WebLN")
+        } else if (error.message?.toLowerCase().includes('user rejected')) {
+          setWeblnError("Pago cancelado por el usuario")
+        } else {
+          setWeblnError("Error al inicializar WebLN")
+        }
+      } else {
+        setWeblnError("Error desconocido al inicializar WebLN")
+      }
+    }
+  }, [isMobile])
+
   useEffect(() => {
     const initWebLN = async () => {
       try {
         console.log('Iniciando initWebLN...');
-        
         // Solo intentar WebLN en desktop
         if (!isMobile) {
           console.log('Verificando disponibilidad de WebLN...');
-          
           const hasWebLN = await waitForWebLN();
-            
           if (hasWebLN) {
             console.log('WebLN detectado, intentando habilitar...');
             try {
               const provider = await requestProvider();
-              
               if (provider) {
                 await provider.enable();
                 console.log('WebLN habilitado correctamente');
@@ -200,20 +216,14 @@ export default function WebLNBoostButton({
         handleWebLNError(error);
       }
     };
-
-    // Limpiar estado al montar
     setWebln(null);
     setWeblnError("");
-    
-    // Iniciar la detección
     initWebLN();
-    
-    // Cleanup
     return () => {
       setWebln(null);
       setWeblnError("");
     };
-  }, [isMobile]);
+  }, [isMobile, handleWebLNError]);
 
   const handleUserConsent = async () => {
     try {
@@ -242,26 +252,6 @@ export default function WebLNBoostButton({
     } catch (error) {
       console.error("Error al habilitar WebLN:", error)
       handleWebLNError(error)
-    }
-  }
-
-  const handleWebLNError = (error: unknown) => {
-    setWebln(null)
-    if (!isMobile) {
-      if (error instanceof Error) {
-        if (error.message?.toLowerCase().includes('not authorized') || 
-            error.message?.toLowerCase().includes('permission denied')) {
-          setWeblnError("Este sitio necesita autorización en Alby. Por favor, autoriza el sitio en la extensión y recarga la página.")
-        } else if (error.message?.toLowerCase().includes('no provider available')) {
-          setWeblnError("No se detectó una billetera compatible con WebLN")
-        } else if (error.message?.toLowerCase().includes('user rejected')) {
-          setWeblnError("Pago cancelado por el usuario")
-        } else {
-          setWeblnError("Error al inicializar WebLN")
-        }
-      } else {
-        setWeblnError("Error desconocido al inicializar WebLN")
-      }
     }
   }
 
