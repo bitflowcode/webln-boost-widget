@@ -531,6 +531,11 @@ export default function WebLNBoostButton({
             >
               Donate Sats
             </Button>
+            {receiverType === 'lightning' && receiver && (
+              <div className="mt-2 text-white/80 text-sm break-all text-center">
+                <span className="font-mono">{receiver}</span>
+              </div>
+            )}
           </div>
         )
 
