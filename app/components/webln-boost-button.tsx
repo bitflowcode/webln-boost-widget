@@ -4,11 +4,10 @@ import { useState, useEffect, useCallback } from "react"
 import { requestProvider, type WebLNProvider } from "webln"
 import { Button } from "@/app/components/ui/button"
 import { QRCodeSVG } from "qrcode.react"
-import WidgetInfoTooltip from "./info-tooltip"
+import WidgetInfoTooltip from "./widget-info-tooltip"
 import RoboAvatar from "./ui/robo-avatar"
 import CustomAvatar from "./ui/custom-avatar"
 import { bech32 } from 'bech32'
-import InfoTooltip from "./info-tooltip"
 
 // Definir tipos para window.webln y window.alby
 declare global {
@@ -688,7 +687,7 @@ export default function WebLNBoostButton({
         {weblnError && (
           <div className="absolute -bottom-2 left-0 right-0 transform translate-y-full pt-2 z-10 flex justify-center bg-transparent">
             <div className="p-0 bg-transparent">
-              <InfoTooltip />
+              <WidgetInfoTooltip />
             </div>
           </div>
         )}
