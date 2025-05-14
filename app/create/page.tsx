@@ -346,10 +346,6 @@ export default function CreatePage() {
               </div>
             </div>
           </div>
-          {/* Aviso sobre autorización de Alby/WebLN */}
-            <div className="mb-8 p-4 bg-yellow-100 text-yellow-800 rounded text-sm text-center shadow max-w-2xl mx-auto">
-              ⚡ <b>Importante:</b> Cuando insertes este widget en otra web, tus visitantes deberán autorizar el dominio <b>bitflow.site</b> en la extensión de Alby para poder pagar con Lightning. Esto es normal, ya que el pago se realiza desde el iframe de bitflow.site, no desde tu dominio.
-            </div>
         </form>
       </div>
     </main>
