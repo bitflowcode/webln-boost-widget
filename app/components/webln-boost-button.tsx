@@ -687,7 +687,14 @@ export default function WebLNBoostButton({
         {weblnError && (
           <div className="absolute -bottom-2 left-0 right-0 transform translate-y-full pt-2 z-10 flex justify-center bg-transparent">
             <div className="p-0 bg-transparent">
-              <WidgetInfoTooltip />
+              {weblnError.toLowerCase().includes('autorización') || weblnError.toLowerCase().includes('autoriza') ? (
+                <div className="mt-2 p-3 bg-yellow-100 text-yellow-800 rounded text-sm text-center shadow-lg max-w-xs">
+                  ⚡ Para pagar con Alby, primero debes autorizar el dominio <b>bitflow.site</b> en la extensión.<br />
+                  Esto es necesario aunque estés usando el widget en otra web, ya que el pago se realiza desde el iframe de bitflow.site.
+                </div>
+              ) : (
+                <WidgetInfoTooltip />
+              )}
             </div>
           </div>
         )}
