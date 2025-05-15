@@ -615,7 +615,7 @@ export default function WebLNBoostButton({
             <textarea
               value={note}
               onChange={handleNoteChange}
-              placeholder="Enter your note"
+              placeholder="Enter your note here"
               className="w-full max-w-[360px] p-4 rounded-3xl text-xl mb-6 h-40 resize-none placeholder:text-gray-400 focus:outline-none focus:ring-2"
               style={{ 
                 color: currentThemeColor,
