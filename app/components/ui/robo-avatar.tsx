@@ -13,7 +13,7 @@ interface RoboAvatarProps {
 function generateRobohashUrl(seed: string | undefined, set: string | undefined): string {
   const safeSeed = seed || 'default'
   const safeSet = set || 'set1'
-  return `https://robohash.org/${encodeURIComponent(safeSeed)}?set=${safeSet}`
+  return `/api/robohash?seed=${encodeURIComponent(safeSeed)}&set=${encodeURIComponent(safeSet)}`
 }
 
 export default function RoboAvatar({ seed, set, size = 128, className = '' }: RoboAvatarProps) {
