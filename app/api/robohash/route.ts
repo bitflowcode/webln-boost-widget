@@ -23,7 +23,9 @@ const set = allowedSets.includes(requestedSet) ? requestedSet : 'set1'
         'Cache-Control': 'public, max-age=604800' // 7 días
       }
     })
-  } catch (err) {
+  } 
+  catch (err) {
+    console.error('Error al acceder a RoboHash:', err)
     return new Response('Error de conexión con RoboHash', { status: 500 })
   }
 }
