@@ -1,3 +1,22 @@
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import "../../globals.css";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+export const metadata: Metadata = {
+  title: 'Bitflow Widget',
+  description: 'Widget de donaciones Bitcoin Lightning',
+};
+
 export default function WidgetLayout({
   children,
 }: {
@@ -5,12 +24,27 @@ export default function WidgetLayout({
 }) {
   return (
     <html lang="es" className="bg-transparent">
-      <body className="bg-transparent">{children}</body>
+      <head>
+        {/* Configuración de precarga de fuentes */}
+        <link
+          rel="preload"
+          href="/_next/static/media/569ce4b8f30dc480-s.p.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          href="/_next/static/media/93f479601ee12b01-s.p.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+      </head>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-transparent`}>
+        {children}
+        {/* NO incluir Footer aquí */}
+      </body>
     </html>
   )
-}
-
-export const metadata = {
-  title: 'Bitflow Widget',
-  description: 'Widget de donaciones Bitcoin Lightning',
 } 
