@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react"
 import { requestProvider, type WebLNProvider } from "webln"
 import { Button } from "@/app/components/ui/button"
 import { QRCodeSVG } from "qrcode.react"
-import WidgetInfoTooltip from "./widget-info-tooltip"
+
 import RoboAvatar from "./ui/robo-avatar"
 import CustomAvatar from "./ui/custom-avatar"
 import { bech32 } from 'bech32'
@@ -123,7 +123,7 @@ export default function WebLNBoostButton({
   const [amount, setAmount] = useState<number>(0)
   const [note, setNote] = useState<string>("")
   const [webln, setWebln] = useState<WebLNProvider | null>(null)
-  const [weblnError, setWeblnError] = useState<string>("")
+  const [weblnError, setWeblnError] = useState<string>("") // eslint-disable-line @typescript-eslint/no-unused-vars
   const [invoice, setInvoice] = useState<string>("")
   const [isHolding, setIsHolding] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
@@ -689,13 +689,7 @@ export default function WebLNBoostButton({
         >
           {renderStep()}
         </div>
-        {weblnError && (
-          <div className="absolute -bottom-2 left-0 right-0 transform translate-y-full pt-2 z-10 flex justify-center bg-transparent">
-            <div className="p-0 bg-transparent">
-              <WidgetInfoTooltip />
-            </div>
-          </div>
-        )}
+
       </div>
     </div>
   )
