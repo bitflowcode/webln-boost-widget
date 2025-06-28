@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useEffect, useCallback } from 'react'
-import WebLNBoostButton from '@/app/components/webln-boost-button'
+import React, { useState, useEffect, useCallback } from 'react'
+import WebLNBoostButton from '../../components/webln-boost-button'
 import Link from 'next/link'
 
 const RECIPIENT_ADDRESS = "bitflowz@getalby.com"

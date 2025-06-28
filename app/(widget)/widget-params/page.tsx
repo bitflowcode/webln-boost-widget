@@ -1,5 +1,5 @@
-import WebLNBoostButton from '@/app/components/webln-boost-button'
-import WidgetStyles from '@/app/widget/[id]/widget-styles'
+import WebLNBoostButton from '../../components/webln-boost-button'
+import WidgetStyles from '../widget/[id]/widget-styles'
 
 type AvatarSet = 'set1' | 'set2' | 'set3' | 'set4' | 'set5'
 

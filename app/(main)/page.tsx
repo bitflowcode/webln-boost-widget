@@ -1,5 +1,5 @@
-import WebLNBoostButton from "./components/webln-boost-button"
-import InfoTooltip from "./components/info-tooltip"
+import WebLNBoostButton from "../components/webln-boost-button"
+import InfoTooltip from "../components/info-tooltip"
 
 export default function Home() {
   return (

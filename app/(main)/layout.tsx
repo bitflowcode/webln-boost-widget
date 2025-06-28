@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "../../globals.css";
+import "../globals.css";
+import Footer from "../components/footer"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,17 +14,17 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Bitflow Widget',
-  description: 'Widget de donaciones Bitcoin Lightning',
+  title: "Bitflow",
+  description: "Crea tu Widget de donaciones Bitcoin Lightning",
 };
 
-export default function WidgetLayout({
+export default function RootLayout({
   children,
-}: {
-  children: React.ReactNode
-}) {
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
-    <html lang="es" className="bg-transparent">
+    <html lang="en">
       <head>
         {/* Configuración de precarga de fuentes */}
         <link
@@ -41,10 +42,12 @@ export default function WidgetLayout({
           crossOrigin="anonymous"
         />
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-transparent`}>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
         {children}
-        {/* NO incluir Footer aquí */}
+        <Footer />
       </body>
     </html>
-  )
-} 
+  );
+}
