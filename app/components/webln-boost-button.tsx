@@ -548,15 +548,15 @@ export default function WebLNBoostButton({
                 <Button
                   key={preset}
                   onClick={() => handleAmountSelect(preset)}
-                  className={`rounded-full px-4 py-3 flex-1 text-sm flex flex-col items-center leading-tight h-[70px] justify-center ${
+                  className={`rounded-full w-[70px] h-[70px] text-xs flex flex-col items-center leading-tight justify-center ${
                     amount === preset
                       ? "bg-white"
                       : "bg-transparent text-white border-2 border-white"
                   }`}
                   style={amount === preset ? { color: currentThemeColor } : {}}
                 >
-                  <span className="font-medium">{getLabel(labels, index) || preset}</span>
-                  <span className="text-xs mt-1">{preset} sats</span>
+                  <span className="font-medium text-[10px]">{getLabel(labels, index) || preset}</span>
+                  <span className="text-[9px] mt-0.5">{preset} sats</span>
                 </Button>
               ))}
             </div>
