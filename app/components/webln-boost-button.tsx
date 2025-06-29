@@ -548,7 +548,7 @@ export default function WebLNBoostButton({
                 <Button
                   key={preset}
                   onClick={() => handleAmountSelect(preset)}
-                  className={`rounded-full w-[75px] h-[75px] text-sm font-medium flex flex-col items-center leading-tight justify-center ${
+                  className={`rounded-full w-[75px] h-[75px] text-sm font-bold flex flex-col items-center leading-tight justify-center ${
                     amount === preset
                       ? "bg-white"
                       : "bg-transparent text-white border-2 border-white"
