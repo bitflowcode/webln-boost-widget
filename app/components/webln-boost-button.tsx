@@ -543,20 +543,20 @@ export default function WebLNBoostButton({
         return (
           <>
             <h1 className="text-3xl font-bold text-white mb-6">How many Sats?</h1>
-            <div className="flex gap-3 mb-4 w-full max-w-[360px] justify-center">
+            <div className="flex gap-4 mb-4 w-full max-w-[380px] justify-center">
               {amounts.map((preset, index) => (
                 <Button
                   key={preset}
                   onClick={() => handleAmountSelect(preset)}
-                  className={`rounded-full w-[70px] h-[70px] text-xs flex flex-col items-center leading-tight justify-center ${
+                  className={`rounded-full w-[75px] h-[75px] text-xs flex flex-col items-center leading-tight justify-center ${
                     amount === preset
                       ? "bg-white"
                       : "bg-transparent text-white border-2 border-white"
                   }`}
                   style={amount === preset ? { color: currentThemeColor } : {}}
                 >
-                  <span className="font-medium text-[10px]">{getLabel(labels, index) || preset}</span>
-                  <span className="text-[9px] mt-0.5">{preset} sats</span>
+                  <span className="font-medium text-[11px]">{getLabel(labels, index) || preset}</span>
+                  <span className="text-[10px] mt-0.5">{preset} sats</span>
                 </Button>
               ))}
             </div>
@@ -575,7 +575,7 @@ export default function WebLNBoostButton({
                 <span className="text-lg mt-1 font-bold">⚡</span>
               </div>
             </Button>
-            <div className="w-full max-w-[360px] flex justify-center">
+            <div className="w-full max-w-[300px] flex justify-center">
               <input
                 type="number"
                 inputMode="numeric"
