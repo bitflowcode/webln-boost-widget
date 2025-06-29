@@ -616,7 +616,7 @@ export default function WebLNBoostButton({
               value={note}
               onChange={handleNoteChange}
               placeholder="Enter your note here"
-              className="w-full max-w-[360px] p-4 rounded-3xl text-xl mb-6 h-40 resize-none placeholder:text-gray-400 focus:outline-none focus:ring-2"
+              className="w-full max-w-[300px] p-4 rounded-3xl text-xl mb-6 h-40 resize-none placeholder:text-gray-400 focus:outline-none focus:ring-2"
               style={{ 
                 color: currentThemeColor,
                 '--tw-ring-color': currentThemeColor
@@ -649,7 +649,7 @@ export default function WebLNBoostButton({
               <div className="bg-white p-4 rounded-lg flex-shrink-0">
                 <QRCodeSVG value={invoice} size={200} />
               </div>
-              <div className="w-full bg-[#2d2d2d] p-3 rounded-lg flex-shrink-0">
+              <div className="w-full max-w-[320px] bg-[#2d2d2d] p-3 rounded-lg flex-shrink-0">
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-xs text-white/70">Lightning Invoice:</p>
                   <button
